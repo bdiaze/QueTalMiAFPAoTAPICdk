@@ -1,3 +1,4 @@
+using Amazon.Lambda.Serialization.SystemTextJson;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -7,7 +8,11 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
 
+builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi, new SourceGeneratorLambdaJsonSerializer<AppJsonSerializerContext>());
+
 var app = builder.Build();
+
+app.UseHttpsRedirection();
 
 var sampleTodos = new Todo[] {
     new(1, "Walk the dog"),
