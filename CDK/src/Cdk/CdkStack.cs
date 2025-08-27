@@ -30,7 +30,6 @@ namespace Cdk
             string subnetId2 = System.Environment.GetEnvironmentVariable("SUBNET_ID_2") ?? throw new ArgumentNullException("SUBNET_ID_2");
             string rdsSecurityGroupId = System.Environment.GetEnvironmentVariable("RDS_SECURITY_GROUP_ID") ?? throw new ArgumentNullException("RDS_SECURITY_GROUP_ID");
             string secretArnConnectionString = System.Environment.GetEnvironmentVariable("SECRET_ARN_CONNECTION_STRING") ?? throw new ArgumentNullException("SECRET_ARN_CONNECTION_STRING");
-            string parameterNameApiAllowedDomains = System.Environment.GetEnvironmentVariable("PARAMETER_NAME_API_ALLOWED_DOMAINS") ?? throw new ArgumentNullException("PARAMETER_NAME_API_ALLOWED_DOMAINS");
             string allowedDomains = System.Environment.GetEnvironmentVariable("ALLOWED_DOMAINS") ?? throw new ArgumentNullException("ALLOWED_DOMAINS");
 
             // Se obtiene la VPC y subnets...
