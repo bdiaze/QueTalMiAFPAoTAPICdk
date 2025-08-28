@@ -24,7 +24,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                     reader.GetInt16(0),
                     reader.GetString(1),
                     reader.GetString(2),
-                    reader.GetByte(3)
+                    reader.GetByte(3),
+                    null
                 ));
             }
             await reader.CloseAsync();
@@ -50,7 +51,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                     reader.GetInt16(0),
                     reader.GetString(1),
                     reader.GetString(2),
-                    reader.GetByte(3)
+                    reader.GetByte(3),
+                    null
                 );
             }
             await reader.CloseAsync();

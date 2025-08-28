@@ -94,7 +94,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     string jsonRetorno = JsonSerializer.Serialize(cuotas, AppJsonSerializerContext.Default.ListCuotaUf);
                     int cantBytes = Encoding.UTF8.GetByteCount(jsonRetorno);
 
-                    SalObtenerCuotas retorno = new(null, null);
+                    SalObtenerCuotas? retorno = null;
                     if (cantBytes > 5 * 1000 * 1000) {
                         string s3url = await s3Helper.UploadFile(
                             variableEntorno.Obtener("BUCKET_NAME_LARGE_RESPONSES"),

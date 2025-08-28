@@ -3,6 +3,7 @@
         short IdTipoMensaje,
         string DescripcionCorta,
         string DescripcionLarga,
-        byte Vigencia
+        byte Vigencia,
+        ICollection<MensajeUsuario>? MensajeUsuarios
     );
 }

@@ -20,11 +20,19 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 try {
                     TipoMensaje? salida = await tipoMensajeDAO.ObtenerTipoMensaje(idTipoMensaje);
 
-                    LambdaLogger.Log(
-                        $"[GET] - [TipoMensaje] - [ObtenerTipoMensaje] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
-                        $"Se obtuvo el tipo de mensaje exitosamente - ID Tipo Mensaje: {idTipoMensaje}.");
+                    if (salida == null) {
+                        LambdaLogger.Log(
+                            $"[GET] - [TipoMensaje] - [ObtenerTipoMensaje] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status204NoContent}] - " +
+                            $"No se encontró el tipo de mensaje - ID Tipo Mensaje: {idTipoMensaje}.");
 
-                    return Results.Ok(salida);
+                        return Results.NoContent();
+                    } else {
+                        LambdaLogger.Log(
+                            $"[GET] - [TipoMensaje] - [ObtenerTipoMensaje] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
+                            $"Se obtuvo el tipo de mensaje exitosamente - ID Tipo Mensaje: {idTipoMensaje}.");
+
+                        return Results.Ok(salida);
+                    }
                 } catch (Exception ex) {
                     LambdaLogger.Log(
                         $"[GET] - [TipoMensaje] - [ObtenerTipoMensaje] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +
