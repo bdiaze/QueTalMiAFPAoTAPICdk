@@ -1,5 +1,9 @@
 using Amazon.Lambda.Serialization.SystemTextJson;
-using System.Text.Json.Serialization;
+using Amazon.S3;
+using Amazon.SecretsManager;
+using Amazon.SimpleSystemsManagement;
+using QueTalMiAFPAoTAPI.Helpers;
+using QueTalMiAFPAoTAPI.Models;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -9,6 +13,15 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi, new SourceGeneratorLambdaJsonSerializer<AppJsonSerializerContext>());
+
+builder.Services.AddSingleton<IAmazonSimpleSystemsManagement, AmazonSimpleSystemsManagementClient>();
+builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
+builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
+builder.Services.AddSingleton<VariableEntorno>();
+builder.Services.AddSingleton<ParameterStoreHelper>();
+builder.Services.AddSingleton<SecretManagerHelper>();
+builder.Services.AddSingleton<ConnectionStringHelper>();
+
 
 var app = builder.Build();
 
@@ -30,11 +43,3 @@ todosApi.MapGet("/{id}", (int id) =>
         : Results.NotFound());
 
 app.Run();
-
-public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
-
-[JsonSerializable(typeof(Todo[]))]
-internal partial class AppJsonSerializerContext : JsonSerializerContext
-{
-
-}
