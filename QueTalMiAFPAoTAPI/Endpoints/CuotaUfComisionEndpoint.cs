@@ -144,19 +144,12 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
 
                         List<CuotaUfComision> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, dtFecha);
                         foreach (CuotaUfComision cuota in cuotas.OrderBy(c => c.Afp).ThenBy(c => c.Fondo)) {
-                            decimal? comision;
-                            if (entrada.TipoComision == 1) {
-                                comision = cuota.ComisDeposCotizOblig;
-                            } else {
-                                comision = cuota.ComisAdminCtaAhoVol;
-                            }
-
                             retorno.Add(new SalObtenerUltimaCuota(
                                 cuota.Afp,
                                 cuota.Fecha,
                                 cuota.Fondo,
                                 cuota.Valor,
-                                comision
+                                entrada.TipoComision == 1 ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
                             ));
                         }
                     }
