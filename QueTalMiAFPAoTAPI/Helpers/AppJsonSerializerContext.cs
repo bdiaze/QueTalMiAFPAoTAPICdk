@@ -8,7 +8,11 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(APIGatewayProxyResponse))]
     [JsonSerializable(typeof(RDSSecret))]
     [JsonSerializable(typeof(DateTime))]
-    [JsonSerializable(typeof(Todo[]))]
+    [JsonSerializable(typeof(List<CuotaUf>))]
+    [JsonSerializable(typeof(SalObtenerCuotas))]
+    [JsonSerializable(typeof(EntObtenerUltimaCuota))]
+    [JsonSerializable(typeof(List<SalObtenerUltimaCuota>))]
+    [JsonSerializable(typeof(List<RentabilidadReal>))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }
