@@ -3,6 +3,7 @@ using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.S3;
 using Amazon.SecretsManager;
 using Amazon.SimpleSystemsManagement;
+using QueTalMiAFPAoTAPI.Endpoints;
 using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
 using QueTalMiAFPAoTAPI.Repositories;
@@ -46,27 +47,6 @@ todosApi.MapGet("/{id}", (int id) =>
         ? Results.Ok(todo)
         : Results.NotFound());
 
-#region /CuotaUfComision
-RouteGroupBuilder cuotaUfComisionGroup = app.MapGroup("/CuotaUfComision");
-cuotaUfComisionGroup.MapGet("/UltimaFechaAlguna", async (CuotaUfComisionDAO cuotaUfComisionDAO) => {
-    Stopwatch stopwatch = Stopwatch.StartNew();
-
-    try {
-        DateTime ultimaFecha = await cuotaUfComisionDAO.ObtenerUltimaFechaAlguna();
-
-        LambdaLogger.Log(
-            $"[GET] - [CuotaUfComision] - [UltimaFechaAlguna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
-            $"Se obtuvo la última fecha con algún valor cuota exitosamente.");
-
-        return Results.Ok(ultimaFecha);
-    } catch (Exception ex) {
-        LambdaLogger.Log(
-            $"[GET] - [CuotaUfComision] - [UltimaFechaAlguna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +
-            $"Ocurrió un error al obtener la última fecha con algún valor cuota. " +
-            $"{ex}");
-        return Results.Problem("Ocurrió un error al procesar su solicitud.");
-    }
-});
-#endregion
+app.MapCuotaUfComisionEndpoints();
 
 app.Run();
