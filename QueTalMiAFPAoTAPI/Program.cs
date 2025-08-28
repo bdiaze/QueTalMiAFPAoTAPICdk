@@ -64,7 +64,7 @@ cuotaUfComisionGroup.MapGet("/UltimaFechaAlguna", async (CuotaUfComisionDAO cuot
             $"[GET] - [CuotaUfComision] - [UltimaFechaAlguna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +
             $"Ocurrió un error al obtener la última fecha con algún valor cuota. " +
             $"{ex}");
-        return Results.Problem();
+        return Results.Problem("Ocurrió un error al procesar su solicitud.");
     }
 });
 #endregion

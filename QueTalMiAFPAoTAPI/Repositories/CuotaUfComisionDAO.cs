@@ -8,15 +8,11 @@ namespace QueTalMiAFPAoTAPI.Repositories {
         public async Task<DateTime> ObtenerUltimaFechaAlguna() {
             DateTime ultimaFecha = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time"));
 
-            using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
-            using NpgsqlCommand command = new();
             string queryString = "SELECT MAX(\"FECHA\") " +
                 "FROM \"QueTalMiAFP\".\"CUOTA\";";
 
-            command.CommandText = queryString;
-            command.Connection = connection;
-
-            await connection.OpenAsync();
+            await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
+            await using NpgsqlCommand command = new(queryString, connection);
             DbDataReader reader = await command.ExecuteReaderAsync();
             bool existe = await reader.ReadAsync();
             if (existe) {
