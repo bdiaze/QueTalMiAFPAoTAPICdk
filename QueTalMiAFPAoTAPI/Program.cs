@@ -24,6 +24,7 @@ builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
 builder.Services.AddSingleton<VariableEntorno>();
 builder.Services.AddSingleton<ParameterStoreHelper>();
 builder.Services.AddSingleton<SecretManagerHelper>();
+builder.Services.AddSingleton<S3Helper>();
 builder.Services.AddSingleton<ConnectionStringHelper>();
 builder.Services.AddSingleton<DatabaseConnectionHelper>();
 builder.Services.AddSingleton<CuotaUfComisionDAO>();
