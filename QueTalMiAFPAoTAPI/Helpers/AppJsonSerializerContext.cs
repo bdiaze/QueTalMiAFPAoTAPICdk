@@ -13,6 +13,8 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(EntObtenerUltimaCuota))]
     [JsonSerializable(typeof(List<SalObtenerUltimaCuota>))]
     [JsonSerializable(typeof(List<RentabilidadReal>))]
+    [JsonSerializable(typeof(List<TipoMensaje>))]
+    [JsonSerializable(typeof(TipoMensaje))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }

@@ -8,7 +8,7 @@ using System.Text.Json;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace QueTalMiAFPAoTAPI.Endpoints {
-    public static class CuotaUfComisionEndpoint {
+    public static class CuotaUfComisionEndpoints {
         public static IEndpointRouteBuilder MapCuotaUfComisionEndpoints(this IEndpointRouteBuilder routes) {
             RouteGroupBuilder cuotaUfComisionGroup = routes.MapGroup("/CuotaUfComision");
             cuotaUfComisionGroup.MapUltimaFechaAlgunaEndpoint();

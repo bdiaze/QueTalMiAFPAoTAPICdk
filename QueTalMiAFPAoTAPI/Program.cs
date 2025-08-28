@@ -28,11 +28,13 @@ builder.Services.AddSingleton<S3Helper>();
 builder.Services.AddSingleton<ConnectionStringHelper>();
 builder.Services.AddSingleton<DatabaseConnectionHelper>();
 builder.Services.AddSingleton<CuotaUfComisionDAO>();
+builder.Services.AddSingleton<TipoMensajeDAO>();
 
 var app = builder.Build();
 
 app.UseHttpsRedirection();
 
 app.MapCuotaUfComisionEndpoints();
+app.MapTipoMensajesEndpoints();
 
 app.Run();
