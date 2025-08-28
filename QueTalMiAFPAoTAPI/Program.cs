@@ -1,9 +1,12 @@
+using Amazon.Lambda.Core;
 using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.S3;
 using Amazon.SecretsManager;
 using Amazon.SimpleSystemsManagement;
 using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
+using QueTalMiAFPAoTAPI.Repositories;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateSlimBuilder(args);
 
@@ -21,7 +24,8 @@ builder.Services.AddSingleton<VariableEntorno>();
 builder.Services.AddSingleton<ParameterStoreHelper>();
 builder.Services.AddSingleton<SecretManagerHelper>();
 builder.Services.AddSingleton<ConnectionStringHelper>();
-
+builder.Services.AddSingleton<DatabaseConnectionHelper>();
+builder.Services.AddSingleton<CuotaUfComisionDAO>();
 
 var app = builder.Build();
 
@@ -35,11 +39,34 @@ var sampleTodos = new Todo[] {
     new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
 };
 
-var todosApi = app.MapGroup("/todos");
+RouteGroupBuilder todosApi = app.MapGroup("/todos");
 todosApi.MapGet("/", () => sampleTodos);
 todosApi.MapGet("/{id}", (int id) =>
     sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
         ? Results.Ok(todo)
         : Results.NotFound());
+
+#region /CuotaUfComision
+RouteGroupBuilder cuotaUfComisionGroup = app.MapGroup("/CuotaUfComision");
+cuotaUfComisionGroup.MapGet("/UltimaFechaAlguna", async (CuotaUfComisionDAO cuotaUfComisionDAO) => {
+    Stopwatch stopwatch = Stopwatch.StartNew();
+
+    try {
+        DateTime ultimaFecha = await cuotaUfComisionDAO.ObtenerUltimaFechaAlguna();
+
+        LambdaLogger.Log(
+            $"[GET] - [CuotaUfComision] - [UltimaFechaAlguna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
+            $"Se obtuvo la última fecha con algún valor cuota exitosamente.");
+
+        return Results.Ok(ultimaFecha);
+    } catch (Exception ex) {
+        LambdaLogger.Log(
+            $"[GET] - [CuotaUfComision] - [UltimaFechaAlguna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +
+            $"Ocurrió un error al obtener la última fecha con algún valor cuota. " +
+            $"{ex}");
+        return Results.Problem();
+    }
+});
+#endregion
 
 app.Run();
