@@ -5,6 +5,7 @@ using QueTalMiAFPAoTAPI.Repositories;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace QueTalMiAFPAoTAPI.Endpoints {
     public static class CuotaUfComisionEndpoint {
@@ -141,27 +142,22 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                                 int.Parse(diaMesAnno[1]),
                                 int.Parse(diaMesAnno[0]));
 
-                        foreach (string afp in afps) {
-                            foreach (string fondo in fondos) {
-                                CuotaUfComision? cuota = await cuotaUfComisionDAO.ObtenerUltimaCuota(afp, fondo, dtFecha);
-
-                                if (cuota != null) {
-                                    decimal? comision;
-                                    if (entrada.TipoComision == 1) {
-                                        comision = cuota.ComisDeposCotizOblig;
-                                    } else {
-                                        comision = cuota.ComisAdminCtaAhoVol;
-                                    }
-
-                                    retorno.Add(new SalObtenerUltimaCuota(
-                                        cuota.Afp,
-                                        cuota.Fecha,
-                                        cuota.Fondo,
-                                        cuota.Valor,
-                                        comision
-                                    ));
-                                }
+                        List<CuotaUfComision> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, dtFecha);
+                        foreach (CuotaUfComision cuota in cuotas.OrderBy(c => c.Afp).ThenBy(c => c.Fondo)) {
+                            decimal? comision;
+                            if (entrada.TipoComision == 1) {
+                                comision = cuota.ComisDeposCotizOblig;
+                            } else {
+                                comision = cuota.ComisAdminCtaAhoVol;
                             }
+
+                            retorno.Add(new SalObtenerUltimaCuota(
+                                cuota.Afp,
+                                cuota.Fecha,
+                                cuota.Fondo,
+                                cuota.Valor,
+                                comision
+                            ));
                         }
                     }
 
@@ -191,22 +187,22 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     string[] fondos = listaFondos.ToUpper().Replace(" ", "").Split(",");
 
                     List<RentabilidadReal> retorno = [];
-                    foreach (string fondo in fondos) {
-                        foreach (string afp in afps) {
-                            CuotaUfComision? cuotaInicial = await cuotaUfComisionDAO.ObtenerUltimaCuota(afp, fondo, fechaInicial);
-                            CuotaUfComision? cuotaFinal = await cuotaUfComisionDAO.ObtenerUltimaCuota(afp, fondo, fechaFinal);
 
-                            if (cuotaInicial?.ValorUf != null && cuotaFinal?.ValorUf != null) {
-                                retorno.Add(new RentabilidadReal(
-                                    afp,
-                                    fondo,
-                                    cuotaInicial.Valor,
-                                    cuotaInicial.ValorUf.Value,
-                                    cuotaFinal.Valor,
-                                    cuotaFinal.ValorUf.Value,
-                                    (cuotaFinal.Valor * cuotaInicial.ValorUf.Value / (cuotaInicial.Valor * cuotaFinal.ValorUf.Value) - 1) * 100
-                                ));
-                            }
+                    List<CuotaUfComision> cuotasIniciales = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, fechaInicial);
+                    List<CuotaUfComision> cuotasFinales = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, fechaFinal);
+
+                    foreach (CuotaUfComision cuotaFinal in cuotasFinales) {
+                        CuotaUfComision? cuotaInicial = cuotasIniciales.FirstOrDefault(c => c.Afp == cuotaFinal.Afp && c.Fondo == cuotaFinal.Fondo);
+                        if (cuotaInicial?.ValorUf != null && cuotaFinal?.ValorUf != null) {
+                            retorno.Add(new RentabilidadReal(
+                                cuotaFinal.Afp,
+                                cuotaFinal.Fondo,
+                                cuotaInicial.Valor,
+                                cuotaInicial.ValorUf.Value,
+                                cuotaFinal.Valor,
+                                cuotaFinal.ValorUf.Value,
+                                (cuotaFinal.Valor * cuotaInicial.ValorUf.Value / (cuotaInicial.Valor * cuotaFinal.ValorUf.Value) - 1) * 100
+                            ));
                         }
                     }
 
