@@ -82,14 +82,14 @@ namespace Cdk
             });
 
             StringParameter stringParameterApiBucketName = new(this, $"{appName}StringParameterBucketName", new StringParameterProps {
-                ParameterName = $"/{appName}/Api/BucketName",
+                ParameterName = $"/{appName}/S3/BucketName",
                 Description = $"Bucket Name de la aplicacion {appName}",
                 StringValue = bucket.BucketName,
                 Tier = ParameterTier.STANDARD,
             });
 
             StringParameter stringParameterApiBucketArn = new(this, $"{appName}StringParameterBucketArn", new StringParameterProps {
-                ParameterName = $"/{appName}/Api/BucketArn",
+                ParameterName = $"/{appName}/S3/BucketArn",
                 Description = $"Bucket ARN de la aplicacion {appName}",
                 StringValue = bucket.BucketArn,
                 Tier = ParameterTier.STANDARD,
