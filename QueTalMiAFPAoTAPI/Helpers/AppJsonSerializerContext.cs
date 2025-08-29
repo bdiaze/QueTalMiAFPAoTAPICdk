@@ -18,6 +18,12 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(List<MensajeUsuario>))]
     [JsonSerializable(typeof(MensajeUsuario))]
     [JsonSerializable(typeof(EntIngresarMensaje))]
+    [JsonSerializable(typeof(EntActualizacionMasivaUf))]
+    [JsonSerializable(typeof(SalActualizacionMasivaUf))]
+    [JsonSerializable(typeof(EntActualizacionMasivaCuota))]
+    [JsonSerializable(typeof(SalActualizacionMasivaCuota))]
+    [JsonSerializable(typeof(EntActualizacionMasivaComision))]
+    [JsonSerializable(typeof(SalActualizacionMasivaComision))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }

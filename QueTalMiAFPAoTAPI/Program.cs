@@ -30,6 +30,9 @@ builder.Services.AddSingleton<DatabaseConnectionHelper>();
 builder.Services.AddSingleton<CuotaUfComisionDAO>();
 builder.Services.AddSingleton<MensajeUsuarioDAO>();
 builder.Services.AddSingleton<TipoMensajeDAO>();
+builder.Services.AddSingleton<CuotaDAO>();
+builder.Services.AddSingleton<UfDAO>();
+builder.Services.AddSingleton<ComisionDAO>();
 
 var app = builder.Build();
 
@@ -38,5 +41,8 @@ app.UseHttpsRedirection();
 app.MapCuotaUfComisionEndpoints();
 app.MapMensajeUsuarioEndpoints();
 app.MapTipoMensajesEndpoints();
+app.MapCuotaEndpoints();
+app.MapUfEndpoints();
+app.MapComisionEndpoints();
 
 app.Run();

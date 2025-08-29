@@ -149,7 +149,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                                 cuota.Fecha,
                                 cuota.Fondo,
                                 cuota.Valor,
-                                entrada.TipoComision == 1 ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
+                                entrada.TipoComision == (byte) TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
                             ));
                         }
                     }
