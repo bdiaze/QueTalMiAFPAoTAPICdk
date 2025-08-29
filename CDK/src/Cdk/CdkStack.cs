@@ -81,6 +81,20 @@ namespace Cdk
                 RemovalPolicy = RemovalPolicy.DESTROY,
             });
 
+            StringParameter stringParameterApiBucketName = new(this, $"{appName}StringParameterBucketName", new StringParameterProps {
+                ParameterName = $"/{appName}/Api/BucketName",
+                Description = $"Bucket Name de la aplicacion {appName}",
+                StringValue = bucket.BucketName,
+                Tier = ParameterTier.STANDARD,
+            });
+
+            StringParameter stringParameterApiBucketArn = new(this, $"{appName}StringParameterBucketArn", new StringParameterProps {
+                ParameterName = $"/{appName}/Api/BucketArn",
+                Description = $"Bucket ARN de la aplicacion {appName}",
+                StringValue = bucket.BucketArn,
+                Tier = ParameterTier.STANDARD,
+            });
+
             // Creación de role para la función lambda...
             IRole roleLambda = new Role(this, $"{appName}APILambdaRole", new RoleProps {
                 RoleName = $"{appName}APILambdaRole",
