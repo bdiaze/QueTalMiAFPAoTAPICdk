@@ -60,7 +60,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
             await using NpgsqlCommand command = new(queryString, connection);
 
-            command.Parameters.AddWithValue("@Id", uf.Id);
+            command.Parameters.AddWithValue("@Id", uf.Id!);
             command.Parameters.AddWithValue("@Fecha", uf.Fecha);
             command.Parameters.AddWithValue("@Valor", uf.Valor);
 
