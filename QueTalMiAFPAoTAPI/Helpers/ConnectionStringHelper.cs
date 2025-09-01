@@ -30,11 +30,14 @@ namespace QueTalMiAFPAoTAPI.Helpers {
                 connectionString = 
                     $"Server={host};" +
                     $"Port={port};" +
-                    $"Ssl Mode=Require;" +
-                    $"Trust Server Certificate=true;" +
                     $"Database={database};" +
                     $"User Id={username};" +
                     $"Password='{password}';";
+
+                if (!env.IsDevelopment()) {
+                    connectionString += "Ssl Mode=Require;";
+                    connectionString += "Trust Server Certificate=true;";
+                }
             }
 
             return connectionString;
