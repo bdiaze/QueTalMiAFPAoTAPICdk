@@ -131,27 +131,26 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 try {
                     string[] afps = entrada.ListaAFPs.ToUpper().Replace(" ", "").Split(",");
                     string[] fondos = entrada.ListaFondos.ToUpper().Replace(" ", "").Split(",");
-                    string[] fechas = entrada.ListaFechas.Replace(" ", "").Split(",");
+                    DateTime[] fechas = [.. entrada.ListaFechas.Replace(" ", "").Split(",").Select(f => {
+                        string[] diaMesAnno = f.Split("/");
+                        return new DateTime(
+                            int.Parse(diaMesAnno[2]),
+                            int.Parse(diaMesAnno[1]),
+                            int.Parse(diaMesAnno[0])
+                        );
+                    })];
+
+                    List<CuotaUfComision> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, fechas);
 
                     List<SalObtenerUltimaCuota> retorno = [];
-                    foreach (string fecha in fechas) {
-                        string[] diaMesAnno = fecha.Split("/");
-
-                        DateTime dtFecha = new(
-                                int.Parse(diaMesAnno[2]),
-                                int.Parse(diaMesAnno[1]),
-                                int.Parse(diaMesAnno[0]));
-
-                        List<CuotaUfComision> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, dtFecha);
-                        foreach (CuotaUfComision cuota in cuotas.OrderBy(c => c.Afp).ThenBy(c => c.Fondo)) {
-                            retorno.Add(new SalObtenerUltimaCuota(
-                                cuota.Afp,
-                                cuota.Fecha,
-                                cuota.Fondo,
-                                cuota.Valor,
-                                entrada.TipoComision == (byte) TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
-                            ));
-                        }
+                    foreach (CuotaUfComision cuota in cuotas.OrderBy(c => c.Afp).ThenBy(c => c.Fondo).ThenByDescending(c => c.Fecha)) {
+                        retorno.Add(new SalObtenerUltimaCuota(
+                            cuota.Afp,
+                            cuota.Fecha,
+                            cuota.Fondo,
+                            cuota.Valor,
+                            entrada.TipoComision == (byte)TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
+                        ));
                     }
 
                     LambdaLogger.Log(
@@ -181,21 +180,24 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
 
                     List<RentabilidadReal> retorno = [];
 
-                    List<CuotaUfComision> cuotasIniciales = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, fechaInicial);
-                    List<CuotaUfComision> cuotasFinales = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, fechaFinal);
+                    List<CuotaUfComision> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, [ fechaFinal, fechaInicial ]);
 
-                    foreach (CuotaUfComision cuotaFinal in cuotasFinales) {
-                        CuotaUfComision? cuotaInicial = cuotasIniciales.FirstOrDefault(c => c.Afp == cuotaFinal.Afp && c.Fondo == cuotaFinal.Fondo);
-                        if (cuotaInicial?.ValorUf != null && cuotaFinal?.ValorUf != null) {
-                            retorno.Add(new RentabilidadReal(
-                                cuotaFinal.Afp,
-                                cuotaFinal.Fondo,
-                                cuotaInicial.Valor,
-                                cuotaInicial.ValorUf.Value,
-                                cuotaFinal.Valor,
-                                cuotaFinal.ValorUf.Value,
-                                (cuotaFinal.Valor * cuotaInicial.ValorUf.Value / (cuotaInicial.Valor * cuotaFinal.ValorUf.Value) - 1) * 100
-                            ));
+                    foreach (string afp in afps) {
+                        foreach (string fondo in fondos) {
+                            CuotaUfComision? cuotaInicial = cuotas.Where(c => c.Afp == afp && c.Fondo == fondo).OrderBy(c => c.Fecha).FirstOrDefault();
+                            CuotaUfComision? cuotaFinal = cuotas.Where(c => c.Afp == afp && c.Fondo == fondo).OrderByDescending(c => c.Fecha).FirstOrDefault();
+
+                            if (cuotaInicial?.ValorUf != null && cuotaFinal?.ValorUf != null) {
+                                retorno.Add(new RentabilidadReal(
+                                    cuotaFinal.Afp,
+                                    cuotaFinal.Fondo,
+                                    cuotaInicial.Valor,
+                                    cuotaInicial.ValorUf.Value,
+                                    cuotaFinal.Valor,
+                                    cuotaFinal.ValorUf.Value,
+                                    (cuotaFinal.Valor * cuotaInicial.ValorUf.Value / (cuotaInicial.Valor * cuotaFinal.ValorUf.Value) - 1) * 100
+                                ));
+                            }
                         }
                     }
 

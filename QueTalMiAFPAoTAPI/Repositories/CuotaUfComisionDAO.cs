@@ -2,6 +2,7 @@
 using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
 using System.Data.Common;
+using System.Globalization;
 
 namespace QueTalMiAFPAoTAPI.Repositories {
     public class CuotaUfComisionDAO(DatabaseConnectionHelper connectionHelper) {
@@ -97,42 +98,28 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             return cuotas;
         }
 
-        public async Task<List<CuotaUfComision>> ObtenerUltimaCuota(string[] afps, string[] fondos, DateTime dtFecha) {
+        public async Task<List<CuotaUfComision>> ObtenerUltimaCuota(string[] afps, string[] fondos, DateTime[] fechas) {
             List<CuotaUfComision> cuotas = [];
 
-            await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
-            await using NpgsqlCommand command = new();
-
-            string[] parametrosAfp = new string[afps.Length];
-            for (int i = 0; i < afps.Length; i++) {
-                parametrosAfp[i] = "@Afp" + i;
-                command.Parameters.AddWithValue(parametrosAfp[i], afps[i]);
-            }
-
-            string[] parametrosFondo = new string[fondos.Length];
-            for (int i = 0; i < fondos.Length; i++) {
-                parametrosFondo[i] = "@Fondo" + i;
-                command.Parameters.AddWithValue(parametrosFondo[i], fondos[i]);
-            }
-
-            command.Parameters.AddWithValue("@Fecha", dtFecha);
-
-            string queryString = string.Format("SELECT CUC.\"AFP\", CUC.\"FECHA\", CUC.\"FONDO\", CUC.\"VALOR\", CUC.\"VALOR_UF\", " +
+            string queryString = "SELECT CUC.\"AFP\", CUC.\"FECHA\", CUC.\"FONDO\", CUC.\"VALOR\", CUC.\"VALOR_UF\", " +
                 "CUC.\"COMIS_DEPOS_COTIZ_OBLIG\", CUC.\"COMIS_ADMIN_CTA_AHO_VOL\" " +
                 "FROM \"QueTalMiAFP\".\"CUOTA_UF_COMISION\" CUC " +
-                "WHERE (CUC.\"AFP\", CUC.\"FONDO\", CUC.\"FECHA\") IN " +
-                "(SELECT CU.\"AFP\", CU.\"FONDO\", MAX(CU.\"FECHA\") " +
+                "WHERE (CUC.\"AFP\", CUC.\"FONDO\", CUC.\"FECHA\") IN (SELECT \"STT_AFP\" AS \"AFP\", \"STT_FONDO\" AS \"FONDO\", " +
+                "(SELECT MAX(CU.\"FECHA\") " +
                 "FROM \"QueTalMiAFP\".\"CUOTA\" CU " +
-                "WHERE CU.\"AFP\" IN ({0}) " +
-                "AND CU.\"FONDO\" IN ({1}) " +
-                "AND CU.\"FECHA\" <= @Fecha " +
-                "GROUP BY CU.\"AFP\", CU.\"FONDO\");",
-                string.Join(", ", parametrosAfp),
-                string.Join(", ", parametrosFondo)
-            );
+                "WHERE CU.\"AFP\" = \"STT_AFP\" " +
+                "AND CU.\"FONDO\" = \"STT_FONDO\" " +
+                "AND CU.\"FECHA\" <= TO_DATE(\"STT_FECHA\", 'YYYY-MM-DD')) AS \"FECHA\" " +
+                "FROM STRING_TO_TABLE(@Afps, ',') AS \"STT_AFP\" " +
+                "CROSS JOIN STRING_TO_TABLE(@Fondos, ',') AS \"STT_FONDO\" " +
+                "CROSS JOIN STRING_TO_TABLE(@Fechas, ',') AS \"STT_FECHA\");";
 
-            command.CommandText = queryString;
-            command.Connection = connection;
+            await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
+            await using NpgsqlCommand command = new(queryString, connection);
+
+            command.Parameters.AddWithValue("@Afps", string.Join(",", afps));
+            command.Parameters.AddWithValue("@Fondos", string.Join(",", fondos));
+            command.Parameters.AddWithValue("@Fechas", string.Join(",", fechas.Select(f => f.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))));
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync()) {
