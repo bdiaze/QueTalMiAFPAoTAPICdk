@@ -143,14 +143,22 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     List<CuotaUfComision> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, fechas);
 
                     List<SalObtenerUltimaCuota> retorno = [];
-                    foreach (CuotaUfComision cuota in cuotas.OrderBy(c => c.Afp).ThenBy(c => c.Fondo).ThenByDescending(c => c.Fecha)) {
-                        retorno.Add(new SalObtenerUltimaCuota(
-                            cuota.Afp,
-                            cuota.Fecha,
-                            cuota.Fondo,
-                            cuota.Valor,
-                            entrada.TipoComision == (byte)TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
-                        ));
+                    foreach (string afp in afps) {
+                        foreach (string fondo in fondos) {
+                            foreach (DateTime fecha in fechas) {
+                                CuotaUfComision? cuota = cuotas.Where(c => c.Afp == afp && c.Fondo == fondo && c.Fecha <= fecha).OrderByDescending(c => c.Fecha).FirstOrDefault();
+
+                                if (cuota != null) {
+                                    retorno.Add(new SalObtenerUltimaCuota(
+                                        cuota.Afp,
+                                        cuota.Fecha,
+                                        cuota.Fondo,
+                                        cuota.Valor,
+                                        entrada.TipoComision == (byte)TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
+                                    ));
+                                }
+                            }
+                        }
                     }
 
                     LambdaLogger.Log(
