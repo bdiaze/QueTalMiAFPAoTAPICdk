@@ -98,8 +98,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             return cuotas;
         }
 
-        public async Task<List<CuotaUfComision>> ObtenerUltimaCuota(string[] afps, string[] fondos, DateTime[] fechas) {
-            List<CuotaUfComision> cuotas = [];
+        public async Task<Dictionary<string, Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>>> ObtenerUltimaCuota(string[] afps, string[] fondos, DateTime[] fechas) {
+            Dictionary<string, Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>> cuotas = [];
 
             string queryString = "SELECT CUC.\"AFP\", CUC.\"FECHA\", CUC.\"FONDO\", CUC.\"VALOR\", CUC.\"VALOR_UF\", " +
                 "CUC.\"COMIS_DEPOS_COTIZ_OBLIG\", CUC.\"COMIS_ADMIN_CTA_AHO_VOL\" " +
@@ -123,7 +123,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync()) {
-                cuotas.Add(new CuotaUfComision(
+                CuotaUfComision cuota = new(
                     reader.GetString(0),
                     reader.GetDateTime(1),
                     reader.GetString(2),
@@ -131,7 +131,16 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                     await reader.IsDBNullAsync(4) ? null : Math.Round(reader.GetDecimal(4), 2),
                     await reader.IsDBNullAsync(5) ? null : Math.Round(reader.GetDecimal(5), 2),
                     await reader.IsDBNullAsync(6) ? null : Math.Round(reader.GetDecimal(6), 2)
-                ));
+                );
+
+                if (!cuotas.ContainsKey(cuota.Afp)) {
+                    cuotas.Add(cuota.Afp, []);
+                }
+
+                if (!cuotas[cuota.Afp].ContainsKey(cuota.Fondo)) {
+                    cuotas[cuota.Afp].Add(cuota.Fondo, []);
+                }
+                cuotas[cuota.Afp][cuota.Fondo].Add(cuota.Fecha, cuota);
             }
             await reader.CloseAsync();
             

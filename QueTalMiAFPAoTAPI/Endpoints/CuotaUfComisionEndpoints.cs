@@ -140,13 +140,14 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         );
                     })];
 
-                    List<CuotaUfComision> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, fechas);
+                    Dictionary<string, Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, fechas);
 
                     List<SalObtenerUltimaCuota> retorno = [];
                     foreach (string afp in afps) {
                         foreach (string fondo in fondos) {
                             foreach (DateTime fecha in fechas) {
-                                CuotaUfComision? cuota = cuotas.Where(c => c.Afp == afp && c.Fondo == fondo && c.Fecha <= fecha).OrderByDescending(c => c.Fecha).FirstOrDefault();
+                                DateTime key = cuotas[afp][fondo].Keys.Where(c => c <= fecha).Max();
+                                CuotaUfComision? cuota = cuotas[afp][fondo][key];
 
                                 if (cuota != null) {
                                     retorno.Add(new SalObtenerUltimaCuota(
@@ -188,12 +189,16 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
 
                     List<RentabilidadReal> retorno = [];
 
-                    List<CuotaUfComision> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, [ fechaFinal, fechaInicial ]);
+                    Dictionary<string, Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, [ fechaFinal, fechaInicial ]);
 
                     foreach (string afp in afps) {
                         foreach (string fondo in fondos) {
-                            CuotaUfComision? cuotaInicial = cuotas.Where(c => c.Afp == afp && c.Fondo == fondo).OrderBy(c => c.Fecha).FirstOrDefault();
-                            CuotaUfComision? cuotaFinal = cuotas.Where(c => c.Afp == afp && c.Fondo == fondo).OrderByDescending(c => c.Fecha).FirstOrDefault();
+                            DateTime keyMin = cuotas[afp][fondo].Keys.Min();
+                            DateTime keyMax = cuotas[afp][fondo].Keys.Max();
+
+
+                            CuotaUfComision? cuotaInicial = cuotas[afp][fondo][keyMin];
+                            CuotaUfComision? cuotaFinal = cuotas[afp][fondo][keyMax];
 
                             if (cuotaInicial?.ValorUf != null && cuotaFinal?.ValorUf != null) {
                                 retorno.Add(new RentabilidadReal(
