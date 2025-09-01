@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
 using System.Data.Common;
@@ -85,13 +86,13 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync()) {
-                cuotas.Add(new CuotaUf(
-                    reader.GetString(0),
-                    reader.GetDateTime(1).ToString("yyyy-MM-dd"),
-                    reader.GetString(2),
-                    Math.Round(reader.GetDecimal(3), 2),
-                    await reader.IsDBNullAsync(4) ? null : Math.Round(reader.GetDecimal(4), 2)
-                ));
+                cuotas.Add(new CuotaUf { 
+                    Afp = reader.GetString(0),
+                    Fecha = reader.GetDateTime(1).ToString("yyyy-MM-dd"),
+                    Fondo = reader.GetString(2),
+                    Valor = Math.Round(reader.GetDecimal(3), 2),
+                    ValorUf = await reader.IsDBNullAsync(4) ? null : Math.Round(reader.GetDecimal(4), 2)
+                });
             }
             await reader.CloseAsync();
             
@@ -123,24 +124,27 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync()) {
-                CuotaUfComision cuota = new(
-                    reader.GetString(0),
-                    reader.GetDateTime(1),
-                    reader.GetString(2),
-                    Math.Round(reader.GetDecimal(3), 2),
-                    await reader.IsDBNullAsync(4) ? null : Math.Round(reader.GetDecimal(4), 2),
-                    await reader.IsDBNullAsync(5) ? null : Math.Round(reader.GetDecimal(5), 2),
-                    await reader.IsDBNullAsync(6) ? null : Math.Round(reader.GetDecimal(6), 2)
-                );
+                CuotaUfComision cuota = new() { 
+                    Afp = reader.GetString(0),
+                    Fecha = reader.GetDateTime(1),
+                    Fondo = reader.GetString(2),
+                    Valor = Math.Round(reader.GetDecimal(3), 2),
+                    ValorUf = await reader.IsDBNullAsync(4) ? null : Math.Round(reader.GetDecimal(4), 2),
+                    ComisDeposCotizOblig = await reader.IsDBNullAsync(5) ? null : Math.Round(reader.GetDecimal(5), 2),
+                    ComisAdminCtaAhoVol = await reader.IsDBNullAsync(6) ? null : Math.Round(reader.GetDecimal(6), 2)
+                };
 
-                if (!cuotas.ContainsKey(cuota.Afp)) {
-                    cuotas.Add(cuota.Afp, []);
+                if (!cuotas.TryGetValue(cuota.Afp, out Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>? dictFondos)) {
+                    dictFondos = [];
+                    cuotas.Add(cuota.Afp, dictFondos);
                 }
 
-                if (!cuotas[cuota.Afp].ContainsKey(cuota.Fondo)) {
-                    cuotas[cuota.Afp].Add(cuota.Fondo, []);
+                if (!dictFondos.TryGetValue(cuota.Fondo, out SortedDictionary<DateTime, CuotaUfComision>? dictCuotas)) {
+                    dictCuotas = [];
+                    dictFondos.Add(cuota.Fondo, dictCuotas);
                 }
-                cuotas[cuota.Afp][cuota.Fondo].Add(cuota.Fecha, cuota);
+
+                dictCuotas.Add(cuota.Fecha, cuota);
             }
             await reader.CloseAsync();
             

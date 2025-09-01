@@ -1,6 +1,6 @@
 ﻿using Npgsql;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Helpers;
-using QueTalMiAFPAoTAPI.Models;
 using System.Data.Common;
 
 namespace QueTalMiAFPAoTAPI.Repositories {
@@ -20,13 +20,12 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync()) {
-                tiposMensaje.Add(new TipoMensaje(
-                    reader.GetInt16(0),
-                    reader.GetString(1),
-                    reader.GetString(2),
-                    reader.GetByte(3),
-                    null
-                ));
+                tiposMensaje.Add(new TipoMensaje {
+                    IdTipoMensaje = reader.GetInt16(0),
+                    DescripcionCorta = reader.GetString(1),
+                    DescripcionLarga = reader.GetString(2),
+                    Vigencia = reader.GetByte(3)
+                });
             }
             await reader.CloseAsync();
 
@@ -47,13 +46,12 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             if (await reader.ReadAsync()) {
-                tipoMensaje = new TipoMensaje(
-                    reader.GetInt16(0),
-                    reader.GetString(1),
-                    reader.GetString(2),
-                    reader.GetByte(3),
-                    null
-                );
+                tipoMensaje = new TipoMensaje { 
+                    IdTipoMensaje = reader.GetInt16(0),
+                    DescripcionCorta = reader.GetString(1),
+                    DescripcionLarga = reader.GetString(2),
+                    Vigencia = reader.GetByte(3)
+                };
             }
             await reader.CloseAsync();
 

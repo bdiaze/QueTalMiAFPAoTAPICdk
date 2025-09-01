@@ -1,6 +1,6 @@
 ﻿using Npgsql;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Helpers;
-using QueTalMiAFPAoTAPI.Models;
 using System.Data.Common;
 
 namespace QueTalMiAFPAoTAPI.Repositories {
@@ -23,14 +23,14 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             if (await reader.ReadAsync()) {
-                comision = new Comision(
-                    reader.GetInt64(0),
-                    reader.GetString(1),
-                    reader.GetDateTime(2),
-                    reader.GetDecimal(3),
-                    reader.GetByte(4),
-                    reader.GetByte(5)
-                );
+                comision = new Comision { 
+                    Id = reader.GetInt64(0),
+                    Afp = reader.GetString(1),
+                    Fecha = reader.GetDateTime(2),
+                    Valor = reader.GetDecimal(3),
+                    TipoComision = reader.GetByte(4),
+                    TipoValor = reader.GetByte(5)
+                };
             }
             await reader.CloseAsync();
             

@@ -1,5 +1,6 @@
 ﻿using Amazon.Lambda.APIGatewayEvents;
 using Microsoft.AspNetCore.Mvc;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Models;
 using System.Text.Json.Serialization;
 

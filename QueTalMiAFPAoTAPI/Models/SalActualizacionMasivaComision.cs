@@ -1,6 +1,6 @@
 ﻿namespace QueTalMiAFPAoTAPI.Models {
-    public record SalActualizacionMasivaComision(
-        int CantComisionesInsertadas,
-        int CantComisionesActualizadas
-    );
+    public record SalActualizacionMasivaComision { 
+        public required int CantComisionesInsertadas { get; set; }
+        public required int CantComisionesActualizadas { get; set; }
+    }
 }

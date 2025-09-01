@@ -1,4 +1,5 @@
 ﻿using Amazon.Lambda.Core;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Models;
 using QueTalMiAFPAoTAPI.Repositories;
 using System.Diagnostics;
@@ -18,33 +19,30 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    int cantComisionesInsertadas = 0;
-                    int cantComisionesActualizadas = 0;
+                    SalActualizacionMasivaComision retorno = new() {
+                        CantComisionesInsertadas = 0,
+                        CantComisionesActualizadas = 0
+                    };
 
                     foreach (Comision comision in comisionesExtraidas.Comisiones) {
                         Comision? comisionExistente = await comisionDAO.ObtenerComision(comision.TipoComision, comision.Afp, comision.Fecha);
 
                         if (comisionExistente == null) {
                             await comisionDAO.InsertarComision(comision);
-                            cantComisionesInsertadas++;
+                            retorno.CantComisionesInsertadas++;
                         } else if (comisionExistente.Valor != comision.Valor || comisionExistente.TipoValor != comision.TipoValor) {
-                            await comisionDAO.ActualizarComision(new Comision(
-                                comisionExistente.Id,
-                                comisionExistente.Afp,
-                                comisionExistente.Fecha,
-                                comision.Valor,
-                                comisionExistente.TipoComision,
-                                comision.TipoValor
-                            ));
-                            cantComisionesActualizadas++;
+                            comisionExistente.Valor = comision.Valor;
+                            comisionExistente.TipoValor = comision.TipoValor;
+                            await comisionDAO.ActualizarComision(comisionExistente);
+                            retorno.CantComisionesActualizadas++;
                         }
                     }
 
                     LambdaLogger.Log(
                         $"[POST] - [Comision] - [ActualizacionMasiva] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
-                        $"Actualización masiva de comisiones exitosa: {cantComisionesInsertadas} insertadas y {cantComisionesActualizadas} actualizadas.");
+                        $"Actualización masiva de comisiones exitosa: {retorno.CantComisionesInsertadas} insertadas y {retorno.CantComisionesActualizadas} actualizadas.");
 
-                    return Results.Ok(new SalActualizacionMasivaComision(cantComisionesInsertadas, cantComisionesActualizadas));
+                    return Results.Ok(retorno);
                 } catch (Exception ex) {
                     LambdaLogger.Log(
                         $"[POST] - [Comision] - [ActualizacionMasiva] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +

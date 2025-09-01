@@ -1,6 +1,6 @@
 ﻿namespace QueTalMiAFPAoTAPI.Models {
-    public record SalActualizacionMasivaUf(
-        int CantUfsInsertadas,
-        int CantUfsActualizadas
-    );
+    public class SalActualizacionMasivaUf { 
+        public required int CantUfsInsertadas { get; set; }
+        public required int CantUfsActualizadas { get; set; }
+    }
 }

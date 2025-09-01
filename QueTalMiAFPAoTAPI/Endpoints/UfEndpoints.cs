@@ -1,4 +1,5 @@
 ﻿using Amazon.Lambda.Core;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Models;
 using QueTalMiAFPAoTAPI.Repositories;
 using System.Diagnostics;
@@ -17,29 +18,28 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    int cantUfsInsertadas = 0;
-                    int cantUfsActualizadas = 0;
+                    SalActualizacionMasivaUf retorno = new() { 
+                        CantUfsInsertadas = 0,
+                        CantUfsActualizadas = 0                    
+                    };
 
                     foreach (Uf uf in ufsExtraidas.Ufs) {
                         Uf? ufExistente = await ufDAO.ObtenerUf(uf.Fecha);
                         if (ufExistente == null) {
                             await ufDAO.InsertarUf(uf);
-                            cantUfsInsertadas++;
+                            retorno.CantUfsInsertadas++;
                         } else if (ufExistente.Valor != uf.Valor) {
-                            await ufDAO.ActualizarUf(new Uf(
-                                ufExistente.Id,
-                                ufExistente.Fecha,
-                                uf.Valor
-                            ));
-                            cantUfsActualizadas++;
+                            ufExistente.Valor = uf.Valor;
+                            await ufDAO.ActualizarUf(ufExistente);
+                            retorno.CantUfsActualizadas++;
                         }
                     }
 
                     LambdaLogger.Log(
                         $"[POST] - [Uf] - [ActualizacionMasiva] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
-                        $"Actualización masiva de UF exitosa: {cantUfsInsertadas} insertadas y {cantUfsActualizadas} actualizadas.");
+                        $"Actualización masiva de UF exitosa: {retorno.CantUfsInsertadas} insertadas y {retorno.CantUfsActualizadas} actualizadas.");
 
-                    return Results.Ok(new SalActualizacionMasivaUf(cantUfsInsertadas, cantUfsActualizadas));
+                    return Results.Ok(retorno);
                 } catch (Exception ex) {
                     LambdaLogger.Log(
                         $"[POST] - [Uf] - [ActualizacionMasiva] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +

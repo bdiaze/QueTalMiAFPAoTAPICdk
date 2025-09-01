@@ -1,4 +1,5 @@
 ﻿using Amazon.Lambda.Core;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
 using QueTalMiAFPAoTAPI.Repositories;
@@ -94,16 +95,15 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     string jsonRetorno = JsonSerializer.Serialize(cuotas, AppJsonSerializerContext.Default.ListCuotaUf);
                     int cantBytes = Encoding.UTF8.GetByteCount(jsonRetorno);
 
-                    SalObtenerCuotas? retorno = null;
+                    SalObtenerCuotas retorno = new();
                     if (cantBytes > 5 * 1000 * 1000) {
-                        string s3url = await s3Helper.UploadFile(
+                        retorno.S3Url = await s3Helper.UploadFile(
                             variableEntorno.Obtener("BUCKET_NAME_LARGE_RESPONSES"),
                             Guid.NewGuid().ToString(),
                             jsonRetorno
                         );
-                        retorno = new SalObtenerCuotas(s3url, null);
                     } else {
-                        retorno = new SalObtenerCuotas(null, cuotas);
+                        retorno.ListaCuotas = cuotas;
                     }
 
                     LambdaLogger.Log(
@@ -150,13 +150,13 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                                 CuotaUfComision? cuota = cuotas[afp][fondo][key];
 
                                 if (cuota != null) {
-                                    retorno.Add(new SalObtenerUltimaCuota(
-                                        cuota.Afp,
-                                        cuota.Fecha,
-                                        cuota.Fondo,
-                                        cuota.Valor,
-                                        entrada.TipoComision == (byte)TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
-                                    ));
+                                    retorno.Add(new SalObtenerUltimaCuota { 
+                                        Afp = cuota.Afp,
+                                        Fecha = cuota.Fecha,
+                                        Fondo = cuota.Fondo,
+                                        Valor = cuota.Valor,
+                                        Comision = entrada.TipoComision == (byte)TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
+                                    });
                                 }
                             }
                         }
@@ -201,15 +201,15 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                             CuotaUfComision? cuotaFinal = cuotas[afp][fondo][keyMax];
 
                             if (cuotaInicial?.ValorUf != null && cuotaFinal?.ValorUf != null) {
-                                retorno.Add(new RentabilidadReal(
-                                    cuotaFinal.Afp,
-                                    cuotaFinal.Fondo,
-                                    cuotaInicial.Valor,
-                                    cuotaInicial.ValorUf.Value,
-                                    cuotaFinal.Valor,
-                                    cuotaFinal.ValorUf.Value,
-                                    (cuotaFinal.Valor * cuotaInicial.ValorUf.Value / (cuotaInicial.Valor * cuotaFinal.ValorUf.Value) - 1) * 100
-                                ));
+                                retorno.Add(new RentabilidadReal { 
+                                    Afp = cuotaFinal.Afp,
+                                    Fondo = cuotaFinal.Fondo,
+                                    ValorCuotaInicial = cuotaInicial.Valor,
+                                    ValorUfInicial = cuotaInicial.ValorUf.Value,
+                                    ValorCuotaFinal = cuotaFinal.Valor,
+                                    ValorUfFinal = cuotaFinal.ValorUf.Value,
+                                    Rentabilidad = (cuotaFinal.Valor * cuotaInicial.ValorUf.Value / (cuotaInicial.Valor * cuotaFinal.ValorUf.Value) - 1) * 100
+                                });
                             }
                         }
                     }

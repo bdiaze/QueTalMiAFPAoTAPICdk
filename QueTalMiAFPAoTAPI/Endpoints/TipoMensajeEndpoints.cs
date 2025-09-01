@@ -1,5 +1,5 @@
 ﻿using Amazon.Lambda.Core;
-using QueTalMiAFPAoTAPI.Models;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Repositories;
 using System.Diagnostics;
 

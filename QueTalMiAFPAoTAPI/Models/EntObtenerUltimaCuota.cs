@@ -1,8 +1,8 @@
 ﻿namespace QueTalMiAFPAoTAPI.Models {
-    public record EntObtenerUltimaCuota(
-        string ListaAFPs,
-        string ListaFondos,
-        string ListaFechas,
-        int TipoComision
-    );
+    public class EntObtenerUltimaCuota { 
+        public required string ListaAFPs { get; set; }
+        public required string ListaFondos { get; set; }
+        public required string ListaFechas { get; set; }
+        public required int TipoComision { get; set; }
+    }
 }

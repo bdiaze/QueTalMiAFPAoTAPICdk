@@ -1,4 +1,5 @@
 ﻿using Amazon.Lambda.Core;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Models;
 using QueTalMiAFPAoTAPI.Repositories;
 using System.Diagnostics;
@@ -44,21 +45,13 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 try {
                     DateTime fechaActual = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time"));
                     MensajeUsuario mensajeIngresado = await mensajeUsuarioDAO.IngresarMensajeUsuario(mensaje.IdTipoMensaje, fechaActual, mensaje.Nombre, mensaje.Correo, mensaje.Mensaje);
-                    TipoMensaje? tipoMensaje = await tipoMensajeDAO.ObtenerTipoMensaje(mensajeIngresado.IdTipoMensaje);
+                    mensajeIngresado.TipoMensaje = await tipoMensajeDAO.ObtenerTipoMensaje(mensajeIngresado.IdTipoMensaje);
 
                     LambdaLogger.Log(
                         $"[POST] - [MensajeUsuario] - [IngresarMensaje] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
                         $"Se insertó el mensaje exitosamente - ID Mensaje: {mensajeIngresado.IdMensaje}.");
 
-                    return Results.Ok(new MensajeUsuario(
-                        mensajeIngresado.IdMensaje,
-                        mensajeIngresado.IdTipoMensaje,
-                        mensajeIngresado.FechaIngreso,
-                        mensajeIngresado.Nombre,
-                        mensajeIngresado.Correo,
-                        mensajeIngresado.Mensaje,
-                        tipoMensaje
-                    ));
+                    return Results.Ok(mensajeIngresado);
                 } catch (Exception ex) {
                     LambdaLogger.Log(
                         $"[POST] - [MensajeUsuario] - [IngresarMensaje] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +

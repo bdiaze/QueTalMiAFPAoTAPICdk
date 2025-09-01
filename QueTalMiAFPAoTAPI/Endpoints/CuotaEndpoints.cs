@@ -1,4 +1,5 @@
 ﻿using Amazon.Lambda.Core;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Models;
 using QueTalMiAFPAoTAPI.Repositories;
 using System.Diagnostics;
@@ -17,32 +18,29 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    int cantCuotasInsertadas = 0;
-                    int cantCuotasActualizadas = 0;
+                    SalActualizacionMasivaCuota retorno = new() { 
+                        CantCuotasInsertadas = 0,
+                        CantCuotasActualizadas = 0
+                    };
 
                     foreach (Cuota cuota in cuotasExtraidas.Cuotas) {
                         Cuota? cuotaExistente = await cuotaDAO.ObtenerCuota(cuota.Afp, cuota.Fecha, cuota.Fondo);
 
                         if (cuotaExistente == null) {
                             await cuotaDAO.InsertarCuota(cuota);
-                            cantCuotasInsertadas++;
+                            retorno.CantCuotasInsertadas++;
                         } else if (cuotaExistente.Valor != cuota.Valor) {
-                            await cuotaDAO.ActualizarCuota(new Cuota(
-                                cuotaExistente.Id,
-                                cuotaExistente.Afp,
-                                cuotaExistente.Fecha,
-                                cuotaExistente.Fondo,
-                                cuota.Valor
-                            ));
-                            cantCuotasActualizadas++;
+                            cuotaExistente.Valor = cuota.Valor;
+                            await cuotaDAO.ActualizarCuota(cuotaExistente);
+                            retorno.CantCuotasActualizadas++;
                         }
                     }
 
                     LambdaLogger.Log(
                         $"[POST] - [Cuota] - [ActualizacionMasiva] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
-                        $"Actualización masiva de valores cuota exitosa: {cantCuotasInsertadas} insertadas y {cantCuotasActualizadas} actualizadas.");
+                        $"Actualización masiva de valores cuota exitosa: {retorno.CantCuotasInsertadas} insertadas y {retorno.CantCuotasActualizadas} actualizadas.");
 
-                    return Results.Ok(new SalActualizacionMasivaCuota(cantCuotasInsertadas, cantCuotasActualizadas));
+                    return Results.Ok(retorno);
                 } catch (Exception ex) {
                     LambdaLogger.Log(
                         $"[POST] - [Cuota] - [ActualizacionMasiva] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +

@@ -1,8 +1,8 @@
 ﻿namespace QueTalMiAFPAoTAPI.Models {
-    public record EntIngresarMensaje(
-        short IdTipoMensaje,
-        string Nombre,
-        string Correo,
-        string Mensaje
-    );
+    public class EntIngresarMensaje { 
+        public required short IdTipoMensaje { get; set; }
+        public required string Nombre { get; set; }
+        public required string Correo { get; set; }
+        public required string Mensaje { get; set; }
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using Npgsql;
+using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
 using System.Data.Common;
@@ -25,21 +26,20 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync()) {
-                mensajes.Add(new MensajeUsuario(
-                    reader.GetInt64(0),
-                    reader.GetInt16(1),
-                    reader.GetDateTime(2),
-                    reader.GetString(3),
-                    reader.GetString(4),
-                    reader.GetString(5),
-                    new TipoMensaje(
-                        reader.GetInt16(1),
-                        reader.GetString(6),
-                        reader.GetString(7),
-                        reader.GetByte(8),
-                        null
-                    )
-                ));
+                mensajes.Add(new MensajeUsuario { 
+                    IdMensaje = reader.GetInt64(0),
+                    IdTipoMensaje = reader.GetInt16(1),
+                    FechaIngreso = reader.GetDateTime(2),
+                    Nombre = reader.GetString(3),
+                    Correo = reader.GetString(4),
+                    Mensaje = reader.GetString(5),
+                    TipoMensaje = new TipoMensaje {
+                        IdTipoMensaje = reader.GetInt16(1),
+                        DescripcionCorta = reader.GetString(6),
+                        DescripcionLarga = reader.GetString(7),
+                        Vigencia = reader.GetByte(8)
+                    }
+                });
             }
             await reader.CloseAsync();
 
@@ -73,15 +73,14 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
             long idMensaje = (long)(await command.ExecuteScalarAsync())!;
 
-            return new MensajeUsuario(
-                idMensaje,
-                idTipoMensaje,
-                fechaIngreso,
-                nombre,
-                correo,
-                mensaje,
-                null
-            );
+            return new MensajeUsuario {
+                IdMensaje = idMensaje,
+                IdTipoMensaje = idTipoMensaje,
+                FechaIngreso = fechaIngreso,
+                Nombre = nombre,
+                Correo = correo,
+                Mensaje = mensaje,
+            };
         }
     }
 }
