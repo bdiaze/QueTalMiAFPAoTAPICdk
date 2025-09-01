@@ -1,4 +1,5 @@
 ﻿using Amazon.Lambda.APIGatewayEvents;
+using Microsoft.AspNetCore.Mvc;
 using QueTalMiAFPAoTAPI.Models;
 using System.Text.Json.Serialization;
 
@@ -24,6 +25,7 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(SalActualizacionMasivaCuota))]
     [JsonSerializable(typeof(EntActualizacionMasivaComision))]
     [JsonSerializable(typeof(SalActualizacionMasivaComision))]
+    [JsonSerializable(typeof(ProblemDetails))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }
