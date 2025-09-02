@@ -4,7 +4,7 @@ using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace QueTalMiAFPAoTAPI.Helpers {
-    public class ConnectionStringHelper(IHostEnvironment env, IConfiguration config, VariableEntorno variableEntorno, SecretManagerHelper secretManager) {
+    public class ConnectionStringHelper(IHostEnvironment env, IConfiguration config, VariableEntornoHelper variableEntorno, SecretManagerHelper secretManager) {
 
         private string? connectionString = null;
 

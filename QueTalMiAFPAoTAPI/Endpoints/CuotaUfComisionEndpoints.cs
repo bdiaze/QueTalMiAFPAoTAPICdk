@@ -70,7 +70,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapObtenerCuotasEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapGet("/ObtenerCuotas", async (string listaAFPs, string listaFondos, string fechaInicial, string fechaFinal, CuotaUfComisionDAO cuotaUfComisionDAO, S3Helper s3Helper, VariableEntorno variableEntorno) => {
+            routes.MapGet("/ObtenerCuotas", async (string listaAFPs, string listaFondos, string fechaInicial, string fechaFinal, CuotaUfComisionDAO cuotaUfComisionDAO, S3Helper s3Helper, VariableEntornoHelper variableEntorno) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {

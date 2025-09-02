@@ -18,21 +18,33 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi, new SourceGeneratorLambdaJsonSerializer<AppJsonSerializerContext>());
 
+#region Singleton AWS Services
 builder.Services.AddSingleton<IAmazonSimpleSystemsManagement, AmazonSimpleSystemsManagementClient>();
 builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
 builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
-builder.Services.AddSingleton<VariableEntorno>();
+#endregion
+
+#region Singleton Helpers
+builder.Services.AddSingleton<VariableEntornoHelper>();
 builder.Services.AddSingleton<ParameterStoreHelper>();
 builder.Services.AddSingleton<SecretManagerHelper>();
 builder.Services.AddSingleton<S3Helper>();
 builder.Services.AddSingleton<ConnectionStringHelper>();
 builder.Services.AddSingleton<DatabaseConnectionHelper>();
+#endregion
+
+#region Singleton Repositories DAO
 builder.Services.AddSingleton<CuotaUfComisionDAO>();
 builder.Services.AddSingleton<MensajeUsuarioDAO>();
 builder.Services.AddSingleton<TipoMensajeDAO>();
 builder.Services.AddSingleton<CuotaDAO>();
 builder.Services.AddSingleton<UfDAO>();
 builder.Services.AddSingleton<ComisionDAO>();
+builder.Services.AddSingleton<HistorialNotificacionesDAO>();
+builder.Services.AddSingleton<NotificacionDAO>();
+builder.Services.AddSingleton<TipoNotificacionDAO>();
+builder.Services.AddSingleton<TipoPeriodicidadDAO>();
+#endregion
 
 var app = builder.Build();
 
