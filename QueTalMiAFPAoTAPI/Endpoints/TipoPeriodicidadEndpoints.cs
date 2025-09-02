@@ -1,5 +1,6 @@
 ﻿using Amazon.Lambda.Core;
 using QueTalMiAFPAoTAPI.Entities;
+using QueTalMiAFPAoTAPI.Models;
 using QueTalMiAFPAoTAPI.Repositories;
 using System.Diagnostics;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -64,12 +65,12 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapIngresarEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapPost("/Ingresar", async (short id, string nombre, string cron, TipoPeriodicidadDAO tipoPeriodicidadDAO) => {
+            routes.MapPost("/Ingresar", async (EntIngresarTipoPeriodicidad entrada, TipoPeriodicidadDAO tipoPeriodicidadDAO) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    TipoPeriodicidad? salida = await tipoPeriodicidadDAO.ObtenerUna(id);
-                    salida ??= await tipoPeriodicidadDAO.Ingresar(id, nombre, cron);
+                    TipoPeriodicidad? salida = await tipoPeriodicidadDAO.ObtenerUna(entrada.Id);
+                    salida ??= await tipoPeriodicidadDAO.Ingresar(entrada.Id, entrada.Nombre, entrada.Cron);
 
                     LambdaLogger.Log(
                         $"[POST] - [TipoPeriodicidad] - [Ingresar] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
@@ -79,7 +80,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 } catch (Exception ex) {
                     LambdaLogger.Log(
                         $"[POST] - [TipoPeriodicidad] - [Ingresar] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +
-                        $"Ocurrió un error al ingresar el tipo de periodicidad - ID: {id}. " +
+                        $"Ocurrió un error al ingresar el tipo de periodicidad - ID: {entrada.Id}. " +
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }

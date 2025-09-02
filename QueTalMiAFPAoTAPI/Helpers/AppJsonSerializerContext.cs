@@ -29,6 +29,7 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(ProblemDetails))]
     [JsonSerializable(typeof(List<TipoPeriodicidad>))]
     [JsonSerializable(typeof(TipoPeriodicidad))]
+    [JsonSerializable(typeof(EntIngresarTipoPeriodicidad))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }
