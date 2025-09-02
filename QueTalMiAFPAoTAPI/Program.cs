@@ -56,5 +56,6 @@ app.MapTipoMensajesEndpoints();
 app.MapCuotaEndpoints();
 app.MapUfEndpoints();
 app.MapComisionEndpoints();
+app.MapTipoPeriodicidadEndpoints();
 
 app.Run();
