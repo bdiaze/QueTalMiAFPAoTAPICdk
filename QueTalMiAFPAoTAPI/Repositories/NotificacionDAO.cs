@@ -28,10 +28,10 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                     CorreoNotificacion = reader.GetString(2),
                     IdTipoNotificacion = reader.GetInt16(3),
                     FechaCreacion = reader.GetDateTime(4),
-                    FechaEliminacion = reader.GetDateTime(5),
+                    FechaEliminacion = !await reader.IsDBNullAsync(5) ? reader.GetDateTime(5) : null,
                     Vigente = reader.GetInt16(6),
                     FechaHabilitacion = reader.GetDateTime(7),
-                    FechaDeshabilitacion = reader.GetDateTime(8),
+                    FechaDeshabilitacion = !await reader.IsDBNullAsync(8) ? reader.GetDateTime(8) : null,
                     Habilitado = reader.GetInt16(9)
                 });
             }
@@ -63,10 +63,10 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                     CorreoNotificacion = reader.GetString(2),
                     IdTipoNotificacion = reader.GetInt16(3),
                     FechaCreacion = reader.GetDateTime(4),
-                    FechaEliminacion = reader.GetDateTime(5),
+                    FechaEliminacion = !await reader.IsDBNullAsync(5) ? reader.GetDateTime(5) : null,
                     Vigente = reader.GetInt16(6),
                     FechaHabilitacion = reader.GetDateTime(7),
-                    FechaDeshabilitacion = reader.GetDateTime(8),
+                    FechaDeshabilitacion = !await reader.IsDBNullAsync(8) ? reader.GetDateTime(8) : null,
                     Habilitado = reader.GetInt16(9)
                 });
             }
