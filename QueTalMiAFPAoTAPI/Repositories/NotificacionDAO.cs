@@ -104,12 +104,12 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             command.Parameters.AddWithValue("@Sub", sub);
             command.Parameters.AddWithValue("@CorreoNotificacion", correoNotificacion);
             command.Parameters.AddWithValue("@IdTipoNotificacion", idTipoNotificacion);
-            command.Parameters.AddWithValue("@FechaCreacion", fechaCreacion);
-            if (fechaEliminacion != null) command.Parameters.AddWithValue("@FechaEliminacion", fechaEliminacion);
+            command.Parameters.AddWithValue("@FechaCreacion", fechaCreacion.ToUniversalTime());
+            if (fechaEliminacion != null) command.Parameters.AddWithValue("@FechaEliminacion", fechaEliminacion.Value.ToUniversalTime());
             else command.Parameters.AddWithValue("@FechaEliminacion", DBNull.Value);
             command.Parameters.AddWithValue("@Vigente", vigente);
-            command.Parameters.AddWithValue("@FechaHabilitacion", fechaHabilitacion);
-            if (fechaDeshabilitacion != null) command.Parameters.AddWithValue("@FechaDeshabilitacion", fechaDeshabilitacion);
+            command.Parameters.AddWithValue("@FechaHabilitacion", fechaHabilitacion.ToUniversalTime());
+            if (fechaDeshabilitacion != null) command.Parameters.AddWithValue("@FechaDeshabilitacion", fechaDeshabilitacion.Value.ToUniversalTime());
             else command.Parameters.AddWithValue("@FechaDeshabilitacion", DBNull.Value);
             command.Parameters.AddWithValue("@Habilitado", habilitado);
 
@@ -149,12 +149,12 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             command.Parameters.AddWithValue("@Sub", notificacion.Sub);
             command.Parameters.AddWithValue("@CorreoNotificacion", notificacion.CorreoNotificacion);
             command.Parameters.AddWithValue("@IdTipoNotificacion", notificacion.IdTipoNotificacion);
-            command.Parameters.AddWithValue("@FechaCreacion", notificacion.FechaCreacion);
-            if (notificacion.FechaEliminacion != null) command.Parameters.AddWithValue("@FechaEliminacion", notificacion.FechaEliminacion);
+            command.Parameters.AddWithValue("@FechaCreacion", notificacion.FechaCreacion.ToUniversalTime());
+            if (notificacion.FechaEliminacion != null) command.Parameters.AddWithValue("@FechaEliminacion", notificacion.FechaEliminacion.Value.ToUniversalTime());
             else command.Parameters.AddWithValue("@FechaEliminacion", DBNull.Value);
             command.Parameters.AddWithValue("@Vigente", notificacion.Vigente);
-            command.Parameters.AddWithValue("@FechaHabilitacion", notificacion.FechaHabilitacion);
-            if (notificacion.FechaDeshabilitacion != null) command.Parameters.AddWithValue("@FechaDeshabilitacion", notificacion.FechaDeshabilitacion);
+            command.Parameters.AddWithValue("@FechaHabilitacion", notificacion.FechaHabilitacion.ToUniversalTime());
+            if (notificacion.FechaDeshabilitacion != null) command.Parameters.AddWithValue("@FechaDeshabilitacion", notificacion.FechaDeshabilitacion.Value.ToUniversalTime());
             else command.Parameters.AddWithValue("@FechaDeshabilitacion", DBNull.Value);
             command.Parameters.AddWithValue("@Habilitado", notificacion.Habilitado);
 

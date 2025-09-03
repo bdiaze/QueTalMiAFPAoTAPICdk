@@ -42,8 +42,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
             await using NpgsqlCommand command = new(queryString, connection);
 
-            command.Parameters.AddWithValue("@FechaDesde", fechaDesde);
-            command.Parameters.AddWithValue("@FechaHasta", fechaHasta);
+            command.Parameters.AddWithValue("@FechaDesde", fechaDesde.ToUniversalTime());
+            command.Parameters.AddWithValue("@FechaHasta", fechaHasta.ToUniversalTime());
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync()) {
@@ -74,7 +74,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             await using NpgsqlCommand command = new(queryString, connection);
 
             command.Parameters.AddWithValue("@IdNotificacion", idNotificacion);
-            command.Parameters.AddWithValue("@FechaNotificacion", fechaNotificacion);
+            command.Parameters.AddWithValue("@FechaNotificacion", fechaNotificacion.ToUniversalTime());
             command.Parameters.AddWithValue("@Estado", estado);
 
             long id = (long)(await command.ExecuteScalarAsync())!;
