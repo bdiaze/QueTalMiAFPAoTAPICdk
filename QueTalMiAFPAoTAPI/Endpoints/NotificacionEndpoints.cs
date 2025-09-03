@@ -121,7 +121,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
 
                     // Si se está deshabilitando, se registra la fecha de deshabilitación...
                     if (notificacion.Habilitado == 0 && salida.Habilitado == 1) {
-                        salida.Habilitado = 1;
+                        salida.Habilitado = 0;
                         salida.FechaDeshabilitacion = DateTimeOffset.Now;
                     }
 
