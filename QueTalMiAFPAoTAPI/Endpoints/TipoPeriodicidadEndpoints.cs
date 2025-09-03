@@ -19,11 +19,11 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapObtenerUnaEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapGet("/ObtenerUna", async (short idTipoPeriodicidad, TipoPeriodicidadDAO tipoPeriodicidadDAO) => {
+            routes.MapGet("/ObtenerUna", async (short id, TipoPeriodicidadDAO tipoPeriodicidadDAO) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    TipoPeriodicidad? salida = await tipoPeriodicidadDAO.ObtenerUna(idTipoPeriodicidad);
+                    TipoPeriodicidad? salida = await tipoPeriodicidadDAO.ObtenerUna(id);
 
                     LambdaLogger.Log(
                         $"[GET] - [TipoPeriodicidad] - [ObtenerUna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
@@ -33,7 +33,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 } catch (Exception ex) {
                     LambdaLogger.Log(
                         $"[GET] - [TipoPeriodicidad] - [ObtenerUna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +
-                        $"Ocurrió un error al obtener el tipo de periodicidad - ID Tipo Periodicidad: {idTipoPeriodicidad}. " +
+                        $"Ocurrió un error al obtener el tipo de periodicidad - ID Tipo Periodicidad: {id}. " +
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }

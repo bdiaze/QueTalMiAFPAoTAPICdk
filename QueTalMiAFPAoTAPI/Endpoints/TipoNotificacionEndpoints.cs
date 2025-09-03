@@ -20,11 +20,11 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapObtenerUnaEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapGet("/ObtenerUna", async (short idTipoPeriodicidad, TipoNotificacionDAO tipoNotificacionDAO) => {
+            routes.MapGet("/ObtenerUna", async (short id, TipoNotificacionDAO tipoNotificacionDAO) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    TipoNotificacion? salida = await tipoNotificacionDAO.ObtenerUna(idTipoPeriodicidad);
+                    TipoNotificacion? salida = await tipoNotificacionDAO.ObtenerUna(id);
 
                     LambdaLogger.Log(
                         $"[GET] - [TipoNotificacion] - [ObtenerUna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
@@ -34,7 +34,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 } catch (Exception ex) {
                     LambdaLogger.Log(
                         $"[GET] - [TipoNotificacion] - [ObtenerUna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +
-                         $"Ocurrió un error al obtener el tipo de notificación - ID: {idTipoPeriodicidad}. " +
+                         $"Ocurrió un error al obtener el tipo de notificación - ID: {id}. " +
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
