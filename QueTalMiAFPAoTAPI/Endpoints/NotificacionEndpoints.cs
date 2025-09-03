@@ -124,8 +124,8 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         salida.Habilitado = 0;
                         salida.FechaDeshabilitacion = DateTimeOffset.Now;
                     
-                    // Si se está habilitando, se registra la nueva fecha de habilitación y se quita fecha de deshabilitación...
-                    } else if (notificacion.Habilitado == 1 && salida.Habilitado == 0) {
+                    // Si se está habilitando, se registra la nueva fecha de habilitación y se quita fecha de deshabilitación (solo si está vigente)...
+                    } else if (notificacion.Habilitado == 1 && salida.Habilitado == 0 && salida.Vigente == 1) {
                         salida.Habilitado = 1;
                         salida.FechaHabilitacion = DateTimeOffset.Now;
                         salida.FechaDeshabilitacion = null;
