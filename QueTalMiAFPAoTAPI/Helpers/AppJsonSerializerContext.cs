@@ -33,6 +33,9 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(TipoNotificacion))]
     [JsonSerializable(typeof(List<TipoNotificacion>))]
     [JsonSerializable(typeof(EntIngresarTipoNotificacion))]
+    [JsonSerializable(typeof(Notificacion))]
+    [JsonSerializable(typeof(List<Notificacion>))]
+    [JsonSerializable(typeof(EntIngresarNotificacion))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }

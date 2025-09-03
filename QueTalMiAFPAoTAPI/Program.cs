@@ -58,5 +58,6 @@ app.MapUfEndpoints();
 app.MapComisionEndpoints();
 app.MapTipoPeriodicidadEndpoints();
 app.MapTipoNotificacionEndpoints();
+app.MapNotificacionEndpoints();
 
 app.Run();
