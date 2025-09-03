@@ -25,15 +25,23 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 try {
                     TipoPeriodicidad? salida = await tipoPeriodicidadDAO.ObtenerUna(id);
 
+                    if (salida == null) {
+                        LambdaLogger.Log(
+                            $"[GET] - [TipoPeriodicidad] - [ObtenerUna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status204NoContent}] - " +
+                            $"No se encontró el tipo de periodicidad - ID: {id}.");
+
+                        return Results.NoContent();
+                    }
+
                     LambdaLogger.Log(
                         $"[GET] - [TipoPeriodicidad] - [ObtenerUna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
-                        $"Se obtuvo el tipo de periodicidad exitosamente - ID Tipo Periodicidad: {salida?.Id}.");
+                        $"Se obtuvo el tipo de periodicidad exitosamente - ID: {salida?.Id}.");
 
                     return Results.Ok(salida);
                 } catch (Exception ex) {
                     LambdaLogger.Log(
                         $"[GET] - [TipoPeriodicidad] - [ObtenerUna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +
-                        $"Ocurrió un error al obtener el tipo de periodicidad - ID Tipo Periodicidad: {id}. " +
+                        $"Ocurrió un error al obtener el tipo de periodicidad - ID: {id}. " +
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }

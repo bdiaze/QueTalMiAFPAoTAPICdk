@@ -26,6 +26,14 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 try {
                     TipoNotificacion? salida = await tipoNotificacionDAO.ObtenerUna(id);
 
+                    if (salida == null) {
+                        LambdaLogger.Log(
+                            $"[GET] - [TipoNotificacion] - [ObtenerUna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status204NoContent}] - " +
+                            $"No se encontró el tipo de notificación - ID: {id}.");
+
+                        return Results.NoContent();
+                    }
+
                     LambdaLogger.Log(
                         $"[GET] - [TipoNotificacion] - [ObtenerUna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
                         $"Se obtuvo el tipo de notificación exitosamente - ID: {salida?.Id}.");
