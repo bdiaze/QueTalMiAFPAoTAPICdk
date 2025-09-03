@@ -75,7 +75,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             return notificaciones;
         }
 
-        public async Task<Notificacion> Ingresar(string sub, string correoNotificacion, short idTipoNotificacion, DateTime fechaCreacion, DateTime? fechaEliminacion, short vigente, DateTime fechaHabilitacion, DateTime? fechaDeshabilitacion, short habilitado) {
+        public async Task<Notificacion> Ingresar(string sub, string correoNotificacion, short idTipoNotificacion, DateTimeOffset fechaCreacion, DateTimeOffset? fechaEliminacion, short vigente, DateTimeOffset fechaHabilitacion, DateTimeOffset? fechaDeshabilitacion, short habilitado) {
             string queryString = "INSERT INTO \"QueTalMiAFP\".\"NOTIFICACION\"(" +
                 "\"SUB\", " +
                 "\"CORREO_NOTIFICACION\", " +

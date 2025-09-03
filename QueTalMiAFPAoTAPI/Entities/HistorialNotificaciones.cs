@@ -4,7 +4,7 @@
 
         public required long IdNotificacion { get; set; }
 
-        public required DateTime FechaNotificacion { get; set; }
+        public required DateTimeOffset FechaNotificacion { get; set; }
 
         public required short Estado { get; set; }
     }
