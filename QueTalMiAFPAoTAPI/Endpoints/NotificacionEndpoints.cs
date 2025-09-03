@@ -76,10 +76,10 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         entrada.Sub,
                         entrada.CorreoNotificacion,
                         entrada.IdTipoNotificacion,
-                        DateTime.Now,
+                        TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time")),
                         null,
                         1 /* Vigente */,
-                        DateTime.Now,
+                        TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time")),
                         null,
                         1 /* Habilitado */
                     );
@@ -116,13 +116,13 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     // Si se está eliminando, se registra la fecha de eliminación...
                     if (notificacion.Vigente == 0 && salida.Vigente == 1) {
                         salida.Vigente = 0;
-                        salida.FechaEliminacion = DateTime.Now;
+                        salida.FechaEliminacion = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time"));
                     }
 
                     // Si se está deshabilitando, se registra la fecha de deshabilitación...
                     if (notificacion.Habilitado == 0 && salida.Habilitado == 1) {
                         salida.Habilitado = 1;
-                        salida.FechaDeshabilitacion = DateTime.Now;
+                        salida.FechaDeshabilitacion = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time"));
                     }
 
                     salida = await notificacionDAO.Modificar(salida);
