@@ -11,6 +11,7 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(ProblemDetails))]
     [JsonSerializable(typeof(RDSSecret))]
     [JsonSerializable(typeof(DateTime))]
+    [JsonSerializable(typeof(DateTimeOffset))]
     [JsonSerializable(typeof(List<CuotaUf>))]
     [JsonSerializable(typeof(SalObtenerCuotas))]
     [JsonSerializable(typeof(EntObtenerUltimaCuota))]
@@ -36,6 +37,9 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(Notificacion))]
     [JsonSerializable(typeof(List<Notificacion>))]
     [JsonSerializable(typeof(EntIngresarNotificacion))]
+    [JsonSerializable(typeof(HistorialNotificacion))]
+    [JsonSerializable(typeof(List<HistorialNotificacion>))]
+    [JsonSerializable(typeof(EntIngresarHistorialNotificacion))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }

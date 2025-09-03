@@ -40,7 +40,7 @@ builder.Services.AddSingleton<TipoMensajeDAO>();
 builder.Services.AddSingleton<CuotaDAO>();
 builder.Services.AddSingleton<UfDAO>();
 builder.Services.AddSingleton<ComisionDAO>();
-builder.Services.AddSingleton<HistorialNotificacionesDAO>();
+builder.Services.AddSingleton<HistorialNotificacionDAO>();
 builder.Services.AddSingleton<NotificacionDAO>();
 builder.Services.AddSingleton<TipoNotificacionDAO>();
 builder.Services.AddSingleton<TipoPeriodicidadDAO>();
@@ -59,5 +59,6 @@ app.MapComisionEndpoints();
 app.MapTipoPeriodicidadEndpoints();
 app.MapTipoNotificacionEndpoints();
 app.MapNotificacionEndpoints();
+app.MapHistorialNotificacionEndpoints();
 
 app.Run();

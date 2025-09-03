@@ -4,12 +4,12 @@ using QueTalMiAFPAoTAPI.Helpers;
 using System.Data.Common;
 
 namespace QueTalMiAFPAoTAPI.Repositories {
-    public class HistorialNotificacionesDAO(DatabaseConnectionHelper connectionHelper) {
-        public async Task<List<HistorialNotificaciones>> ObtenerPorNotificacion(long idNotificacion) {
-            List<HistorialNotificaciones> historialNotificaciones = [];
+    public class HistorialNotificacionDAO(DatabaseConnectionHelper connectionHelper) {
+        public async Task<List<HistorialNotificacion>> ObtenerPorNotificacion(long idNotificacion) {
+            List<HistorialNotificacion> historialNotificaciones = [];
 
             string queryString = " SELECT HN.\"ID\", HN.\"ID_NOTIFICACION\", HN.\"FECHA_NOTIFICACION\", HN.\"ESTADO\" " +
-                "FROM \"QueTalMiAFP\".\"HISTORIAL_NOTIFICACIONES\" HN " +
+                "FROM \"QueTalMiAFP\".\"HISTORIAL_NOTIFICACION\" HN " +
                 "WHERE HN.\"ID_NOTIFICACION\" = @IdNotificacion; ";
 
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
@@ -31,11 +31,11 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             return historialNotificaciones;
         }
 
-        public async Task<List<HistorialNotificaciones>> ObtenerPorRangoFechas(DateTimeOffset fechaDesde, DateTimeOffset fechaHasta) {
-            List<HistorialNotificaciones> historialNotificaciones = [];
+        public async Task<List<HistorialNotificacion>> ObtenerPorRangoFechas(DateTimeOffset fechaDesde, DateTimeOffset fechaHasta) {
+            List<HistorialNotificacion> historialNotificaciones = [];
 
             string queryString = " SELECT HN.\"ID\", HN.\"ID_NOTIFICACION\", HN.\"FECHA_NOTIFICACION\", HN.\"ESTADO\" " +
-                "FROM \"QueTalMiAFP\".\"HISTORIAL_NOTIFICACIONES\" HN " +
+                "FROM \"QueTalMiAFP\".\"HISTORIAL_NOTIFICACION\" HN " +
                 "WHERE HN.\"FECHA_NOTIFICACION\" >= @FechaDesde " +
                 "AND HN.\"FECHA_NOTIFICACION\" <= @FechaHasta;";
 
@@ -59,8 +59,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             return historialNotificaciones;
         }
 
-        public async Task<HistorialNotificaciones> Ingresar(long idNotificacion, DateTimeOffset fechaNotificacion, short estado) {
-            string queryString = "INSERT INTO \"QueTalMiAFP\".\"HISTORIAL_NOTIFICACIONES\"(" +
+        public async Task<HistorialNotificacion> Ingresar(long idNotificacion, DateTimeOffset fechaNotificacion, short estado) {
+            string queryString = "INSERT INTO \"QueTalMiAFP\".\"HISTORIAL_NOTIFICACION\"(" +
                 "\"ID_NOTIFICACION\", " +
                 "\"FECHA_NOTIFICACION\", " +
                 "\"ESTADO\"" +
@@ -79,7 +79,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
             long id = (long)(await command.ExecuteScalarAsync())!;
 
-            return new HistorialNotificaciones {
+            return new HistorialNotificacion {
                 Id = id,
                 IdNotificacion = idNotificacion,
                 FechaNotificacion = fechaNotificacion,

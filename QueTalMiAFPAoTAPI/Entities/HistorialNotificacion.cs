@@ -1,5 +1,5 @@
 ﻿namespace QueTalMiAFPAoTAPI.Entities {
-    public class HistorialNotificaciones {
+    public class HistorialNotificacion {
         public long? Id { get; set; }
 
         public required long IdNotificacion { get; set; }
