@@ -53,7 +53,7 @@ namespace Cdk
 
             // Creación de log group lambda...
             LogGroup logGroup = new(this, $"{appName}APILogGroup", new LogGroupProps {
-                LogGroupName = $"/aws/lambda/{appName}APILambdaFunction/logs",
+                LogGroupName = $"/aws/lambda/{appName}API/logs",
                 Retention = RetentionDays.ONE_MONTH,
                 RemovalPolicy = RemovalPolicy.DESTROY
             });
@@ -148,7 +148,7 @@ namespace Cdk
                 Runtime = Runtime.DOTNET_8,
                 Handler = handler,
                 Code = Code.FromAsset("../publish/publish.zip"),
-                FunctionName = $"{appName}APILambdaFunction",
+                FunctionName = $"{appName}API",
                 Timeout = Duration.Seconds(double.Parse(timeout)),
                 MemorySize = double.Parse(memorySize),
                 Architecture = Architecture.X86_64,
@@ -169,7 +169,7 @@ namespace Cdk
 
             // Creación de access logs...
             LogGroup logGroupAccessLogs = new(this, $"{appName}APILambdaFunctionLogGroup", new LogGroupProps {
-                LogGroupName = $"/aws/lambda/{appName}APILambdaFunction/access_logs",
+                LogGroupName = $"/aws/lambda/{appName}API/access_logs",
                 Retention = RetentionDays.ONE_MONTH,
                 RemovalPolicy = RemovalPolicy.DESTROY
             });
@@ -186,7 +186,7 @@ namespace Cdk
                     StageName = "prod",
                     Description = $"Stage para produccion de la aplicacion {appName}",
                 },
-                RestApiName = $"{appName}APILambdaRestApi",
+                RestApiName = $"{appName}API",
                 DefaultMethodOptions = new MethodOptions {
                     ApiKeyRequired = true,
                 },
@@ -214,7 +214,7 @@ namespace Cdk
 
             // Se crea API Key...
             ApiKey apiGatewayKey = new(this, $"{appName}APIAPIKey", new ApiKeyProps {
-                ApiKeyName = $"{appName}APIAPIKey",
+                ApiKeyName = $"{appName}APIKey",
                 Description = $"API Key de {appName} API",
             });
             usagePlan.AddApiKey(apiGatewayKey);
