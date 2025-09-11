@@ -9,5 +9,7 @@
         public required short IdTipoPeriodicidad { get; set; }
 
         public required short Habilitado { get; set; }
+
+        public string? IdProceso { get; set; }
     }
 }

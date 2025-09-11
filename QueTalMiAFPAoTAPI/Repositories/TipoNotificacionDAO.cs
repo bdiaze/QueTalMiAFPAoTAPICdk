@@ -8,7 +8,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
         public async Task<TipoNotificacion?> ObtenerUna(short id) {
             TipoNotificacion? tipoNotificacion = null;
 
-            string queryString = " SELECT TN.\"ID\", TN.\"NOMBRE\", TN.\"DESCRIPCION\", TN.\"ID_TIPO_PERIODICIDAD\", TN.\"HABILITADO\" " +
+            string queryString = " SELECT TN.\"ID\", TN.\"NOMBRE\", TN.\"DESCRIPCION\", TN.\"ID_TIPO_PERIODICIDAD\", TN.\"HABILITADO\", TN.\"ID_PROCESO\" " +
                 "FROM \"QueTalMiAFP\".\"TIPO_NOTIFICACION\" TN " +
                 "WHERE TN.\"ID\" = @Id;";
 
@@ -24,7 +24,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                     Nombre = reader.GetString(1),
                     Descripcion = reader.GetString(2),
                     IdTipoPeriodicidad = reader.GetInt16(3),
-                    Habilitado = reader.GetInt16(4)
+                    Habilitado = reader.GetInt16(4),
+                    IdProceso = !await reader.IsDBNullAsync(5) ? reader.GetString(5) : null,
                 };
             }
             await reader.CloseAsync();
@@ -35,7 +36,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
         public async Task<List<TipoNotificacion>> ObtenerPorTipoPeriodicidad(short idTipoPeriodicidad, short? habilitado = null) {
             List<TipoNotificacion> tiposNotificaciones = [];
 
-            string queryString = " SELECT TN.\"ID\", TN.\"NOMBRE\", TN.\"DESCRIPCION\", TN.\"ID_TIPO_PERIODICIDAD\", TN.\"HABILITADO\" " +
+            string queryString = " SELECT TN.\"ID\", TN.\"NOMBRE\", TN.\"DESCRIPCION\", TN.\"ID_TIPO_PERIODICIDAD\", TN.\"HABILITADO\", TN.\"ID_PROCESO\" " +
                 "FROM \"QueTalMiAFP\".\"TIPO_NOTIFICACION\" TN " +
                 "WHERE TN.\"ID_TIPO_PERIODICIDAD\" = @IdTipoPeriodicidad " +
                 (habilitado != null ? "AND TN.\"HABILITADO\" = @Habilitado;" : ";");
@@ -53,7 +54,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                     Nombre = reader.GetString(1),
                     Descripcion = reader.GetString(2),
                     IdTipoPeriodicidad = reader.GetInt16(3),
-                    Habilitado = reader.GetInt16(4)
+                    Habilitado = reader.GetInt16(4),
+                    IdProceso = !await reader.IsDBNullAsync(5) ? reader.GetString(5) : null,
                 });
             }
             await reader.CloseAsync();
@@ -64,7 +66,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
         public async Task<List<TipoNotificacion>> ObtenerTodas() {
             List<TipoNotificacion> tiposNotificaciones = [];
 
-            string queryString = " SELECT TN.\"ID\", TN.\"NOMBRE\", TN.\"DESCRIPCION\", TN.\"ID_TIPO_PERIODICIDAD\", TN.\"HABILITADO\" " +
+            string queryString = " SELECT TN.\"ID\", TN.\"NOMBRE\", TN.\"DESCRIPCION\", TN.\"ID_TIPO_PERIODICIDAD\", TN.\"HABILITADO\", TN.\"ID_PROCESO\" " +
                 "FROM \"QueTalMiAFP\".\"TIPO_NOTIFICACION\" TN;";
 
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
@@ -77,7 +79,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                     Nombre = reader.GetString(1),
                     Descripcion = reader.GetString(2),
                     IdTipoPeriodicidad = reader.GetInt16(3),
-                    Habilitado = reader.GetInt16(4)
+                    Habilitado = reader.GetInt16(4),
+                    IdProceso = !await reader.IsDBNullAsync(5) ? reader.GetString(5) : null,
                 });
             }
             await reader.CloseAsync();
@@ -85,19 +88,21 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             return tiposNotificaciones;
         }
 
-        public async Task<TipoNotificacion> Ingresar(short id, string nombre, string descripcion, short idTipoPeriodicidad, short habilitado) {
+        public async Task<TipoNotificacion> Ingresar(short id, string nombre, string descripcion, short idTipoPeriodicidad, short habilitado, string? idProceso = null) {
             string queryString = "INSERT INTO \"QueTalMiAFP\".\"TIPO_NOTIFICACION\"(" +
                 "\"ID\", " +
                 "\"NOMBRE\", " +
                 "\"DESCRIPCION\", " +
                 "\"ID_TIPO_PERIODICIDAD\"," +
-                "\"HABILITADO\"" +
+                "\"HABILITADO\"," +
+                "\"ID_PROCESO\"" +
                 ") VALUES (" +
                 "@Id, " +
                 "@Nombre, " +
                 "@Descripcion, " +
                 "@IdTipoPeriodicidad, " +
-                "@Habilitado" +
+                "@Habilitado, " +
+                "@IdProceso" +
                 ");";
 
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
@@ -108,6 +113,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             command.Parameters.AddWithValue("@Descripcion", descripcion);
             command.Parameters.AddWithValue("@IdTipoPeriodicidad", idTipoPeriodicidad);
             command.Parameters.AddWithValue("@Habilitado", habilitado);
+            if (idProceso != null) command.Parameters.AddWithValue("@IdProceso", idProceso);
+            else command.Parameters.AddWithValue("@IdProceso", DBNull.Value);
 
             await command.ExecuteNonQueryAsync();
 
@@ -125,7 +132,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                 "\"NOMBRE\" = @Nombre, " +
                 "\"DESCRIPCION\" = @Descripcion, " +
                 "\"ID_TIPO_PERIODICIDAD\" = @IdTipoPeriodicidad, " +
-                "\"HABILITADO\" = @Habilitado " +
+                "\"HABILITADO\" = @Habilitado, " +
+                "\"ID_PROCESO\" = @IdProceso " +
                 "WHERE \"ID\" = @Id;";
 
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
@@ -136,6 +144,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             command.Parameters.AddWithValue("@Descripcion", tipoNotificacion.Descripcion);
             command.Parameters.AddWithValue("@IdTipoPeriodicidad", tipoNotificacion.IdTipoPeriodicidad);
             command.Parameters.AddWithValue("@Habilitado", tipoNotificacion.Habilitado);
+            if (tipoNotificacion.IdProceso != null) command.Parameters.AddWithValue("@IdProceso", tipoNotificacion.IdProceso);
+            else command.Parameters.AddWithValue("@IdProceso", DBNull.Value);
 
             await command.ExecuteNonQueryAsync();
 
