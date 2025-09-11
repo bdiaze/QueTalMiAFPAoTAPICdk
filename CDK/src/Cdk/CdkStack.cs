@@ -35,7 +35,8 @@ namespace Cdk
             string arnParHermesApiKeyId = System.Environment.GetEnvironmentVariable("ARN_PARAMETER_HERMES_API_KEY_ID") ?? throw new ArgumentNullException("ARN_PARAMETER_HERMES_API_KEY_ID");
             string arnParKairosApiUrl = System.Environment.GetEnvironmentVariable("ARN_PARAMETER_KAIROS_API_URL") ?? throw new ArgumentNullException("ARN_PARAMETER_KAIROS_API_URL");
             string arnParKairosApiKeyId = System.Environment.GetEnvironmentVariable("ARN_PARAMETER_KAIROS_API_KEY_ID") ?? throw new ArgumentNullException("ARN_PARAMETER_KAIROS_API_KEY_ID");
-
+            string arnParNotifLambdaArn = System.Environment.GetEnvironmentVariable("ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN") ?? throw new ArgumentNullException("ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN");
+            string arnParNotifEjecRoleArn = System.Environment.GetEnvironmentVariable("ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN") ?? throw new ArgumentNullException("ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN");
 
             // Se obtiene la VPC y subnets...
             IVpc vpc = Vpc.FromLookup(this, $"{appName}Vpc", new VpcLookupOptions {
@@ -138,7 +139,8 @@ namespace Cdk
                                         arnParHermesApiKeyId,
                                         arnParKairosApiUrl,
                                         arnParKairosApiKeyId,
-
+                                        arnParNotifLambdaArn,
+                                        arnParNotifEjecRoleArn
                                     ],
                                 }),
                                 new PolicyStatement(new PolicyStatementProps{
@@ -185,6 +187,8 @@ namespace Cdk
                     { "ARN_PARAMETER_HERMES_API_KEY_ID", arnParHermesApiKeyId },
                     { "ARN_PARAMETER_KAIROS_API_URL", arnParKairosApiUrl },
                     { "ARN_PARAMETER_KAIROS_API_KEY_ID", arnParKairosApiKeyId },
+                    { "ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN", arnParNotifLambdaArn },
+                    { "ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN", arnParNotifEjecRoleArn },
                 },
                 Vpc = vpc,
                 VpcSubnets = new SubnetSelection {

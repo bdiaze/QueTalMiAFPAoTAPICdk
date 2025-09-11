@@ -44,6 +44,7 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(SalHermesCorreoEnviar))]
     [JsonSerializable(typeof(EntKairosIngresarProceso))]
     [JsonSerializable(typeof(SalKairosIngresarProceso))]
+    [JsonSerializable(typeof(ParametroNotificacion))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }

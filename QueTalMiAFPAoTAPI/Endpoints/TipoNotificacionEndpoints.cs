@@ -46,7 +46,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            });
+            }).WithOpenApi();
             return routes;
         }
 
@@ -69,7 +69,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            });
+            }).WithOpenApi();
             return routes;
         }
 
@@ -92,7 +92,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            });
+            }).WithOpenApi();
             return routes;
         }
 
@@ -116,7 +116,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            });
+            }).WithOpenApi();
             return routes;
         }
 
@@ -140,7 +140,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            });
+            }).WithOpenApi();
             return routes;
         }
 
@@ -163,7 +163,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            });
+            }).WithOpenApi();
             return routes;
         }
     }

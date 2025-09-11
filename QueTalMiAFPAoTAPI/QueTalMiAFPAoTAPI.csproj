@@ -11,10 +11,12 @@
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.AspNetCoreServer.Hosting" Version="1.9.0" />
     <PackageReference Include="AWSSDK.APIGateway" Version="4.0.2.1" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.6.10" />
-    <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.1" />
-    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.3" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.7" />
+    <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.1.1" />
+    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.3.1" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20" />
     <PackageReference Include="Npgsql" Version="9.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
     <PackageReference Include="TimeZoneConverter" Version="7.0.0" />
   </ItemGroup>
 

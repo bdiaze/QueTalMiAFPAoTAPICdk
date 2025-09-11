@@ -4,6 +4,8 @@ using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.S3;
 using Amazon.SecretsManager;
 using Amazon.SimpleSystemsManagement;
+using Microsoft.AspNetCore.Routing.Constraints;
+using Microsoft.OpenApi.Models;
 using QueTalMiAFPAoTAPI.Endpoints;
 using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
@@ -17,7 +19,19 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
 
+builder.Services.Configure<RouteOptions>(options => {
+    options.SetParameterPolicy<RegexInlineRouteConstraint>("regex");
+});
+
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.RestApi, new SourceGeneratorLambdaJsonSerializer<AppJsonSerializerContext>());
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c => {
+    c.SwaggerDoc("v1", new OpenApiInfo {
+        Title = "API ¿Qué tal mi AFP? - Minimal API AoT",
+        Version = "v1"
+    });
+});
 
 #region Singleton AWS Services
 builder.Services.AddSingleton<IAmazonSimpleSystemsManagement, AmazonSimpleSystemsManagementClient>();
@@ -52,6 +66,11 @@ builder.Services.AddSingleton<TipoPeriodicidadDAO>();
 #endregion
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment()) {
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseHttpsRedirection();
 

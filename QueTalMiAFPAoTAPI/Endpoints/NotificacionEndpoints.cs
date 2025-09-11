@@ -1,9 +1,12 @@
 ﻿using Amazon.Lambda.Core;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.OpenApi.Models;
 using QueTalMiAFPAoTAPI.Entities;
+using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
 using QueTalMiAFPAoTAPI.Repositories;
 using System.Diagnostics;
+using System.Text.Json;
 
 namespace QueTalMiAFPAoTAPI.Endpoints {
     public static class NotificacionEndpoints {
@@ -36,7 +39,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            });
+            }).WithOpenApi();
 
             return routes;
         }
@@ -60,29 +63,52 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            });
+            }).WithOpenApi();
 
             return routes;
         }
 
         private static IEndpointRouteBuilder MapIngresarEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapPost("/Ingresar", async (EntIngresarNotificacion entrada, NotificacionDAO notificacionDAO) => {
+            routes.MapPost("/Ingresar", async (EntIngresarNotificacion entrada, VariableEntornoHelper variableEntorno, ParameterStoreHelper parameterStore,  NotificacionDAO notificacionDAO, TipoNotificacionDAO tipoNotificacionDAO, TipoPeriodicidadDAO tipoPeriodicidadDAO, KairosHelper kairos) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
                     // Se valida que no haya ya un registro de notificación aún vigente...
                     Notificacion? salida = (await notificacionDAO.ObtenerPorSub(entrada.Sub, 1 /* Vigente */)).FirstOrDefault(n => n.IdTipoNotificacion == entrada.IdTipoNotificacion);
-                    salida ??= await notificacionDAO.Ingresar(
-                        entrada.Sub,
-                        entrada.CorreoNotificacion,
-                        entrada.IdTipoNotificacion,
-                        DateTimeOffset.Now,
-                        null,
-                        1 /* Vigente */,
-                        DateTimeOffset.Now,
-                        null,
-                        1 /* Habilitado */
-                    );
+                    
+                    if (salida == null) {
+                        // Se obtiene el tipo de notificación...
+                        TipoNotificacion? tipoNotificacion = await tipoNotificacionDAO.ObtenerUna(entrada.IdTipoNotificacion) ?? throw new Exception($"No existe el tipo de notificación ID: {entrada.IdTipoNotificacion}");
+                        TipoPeriodicidad? tipoPeriodicidad = await tipoPeriodicidadDAO.ObtenerUna(tipoNotificacion.IdTipoPeriodicidad) ?? throw new Exception($"No existe el tipo de periodicidad ID: {tipoNotificacion.IdTipoPeriodicidad}");
+                        
+                        // Nos aseguramos que exista el proceso de notificación para el cron deseado...
+                        SalKairosIngresarProceso kairosProceso = await kairos.IngresarProceso(new EntKairosIngresarProceso() { 
+                            Nombre = $"Notificación {entrada.IdTipoNotificacion} - {variableEntorno.Obtener("APP_NAME")}",
+                            Cron = tipoPeriodicidad.Cron,
+                            ArnProceso = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN")),
+                            ArnRol = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN")),
+                            Parametros = JsonSerializer.Serialize(new ParametroNotificacion { IdTipoNotificacion = entrada.IdTipoNotificacion }, AppJsonSerializerContext.Default.ParametroNotificacion),
+                            Habilitado = true,
+                        });
+
+                        // Si no tenemos registrado el ID Proceso se actualiza... 
+                        if (tipoNotificacion.IdProceso != kairosProceso.IdProceso) {
+                            tipoNotificacion.IdProceso = kairosProceso.IdProceso;
+                            tipoNotificacion = await tipoNotificacionDAO.Modificar(tipoNotificacion);
+                        }
+
+                        salida = await notificacionDAO.Ingresar(
+                            entrada.Sub,
+                            entrada.CorreoNotificacion,
+                            tipoNotificacion.Id,
+                            DateTimeOffset.Now,
+                            null,
+                            1 /* Vigente */,
+                            DateTimeOffset.Now,
+                            null,
+                            1 /* Habilitado */
+                        );
+                    }
 
                     LambdaLogger.Log(
                         $"[POST] - [Notificacion] - [Ingresar] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
@@ -96,13 +122,13 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            });
+            }).WithOpenApi();
 
             return routes;
         }
 
         private static IEndpointRouteBuilder MapModificarEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapPut("/Modificar", async (Notificacion notificacion, NotificacionDAO notificacionDAO) => {
+            routes.MapPut("/Modificar", async (Notificacion notificacion, VariableEntornoHelper variableEntorno, ParameterStoreHelper parameterStore, NotificacionDAO notificacionDAO, TipoNotificacionDAO tipoNotificacionDAO, TipoPeriodicidadDAO tipoPeriodicidadDAO, KairosHelper kairos) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
@@ -123,12 +149,42 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     if (notificacion.Habilitado == 0 && salida.Habilitado == 1) {
                         salida.Habilitado = 0;
                         salida.FechaDeshabilitacion = DateTimeOffset.Now;
-                    
+
+                        // Además, se desprograma proceso de notificación si no existen otras notificaciones habilitadas...
+                        int cantOtrasNotif = (await notificacionDAO.ObtenerPorTipoNotificacion(salida.IdTipoNotificacion, 1)).Where(n => n.Id != salida.Id).Count();
+                        if (cantOtrasNotif == 0) {
+                            TipoNotificacion? tipoNotificacion = await tipoNotificacionDAO.ObtenerUna(salida.IdTipoNotificacion) ?? throw new Exception($"No existe el tipo de notificación ID: {salida.IdTipoNotificacion}");
+                            if (tipoNotificacion.IdProceso != null) await kairos.EliminarProceso(tipoNotificacion.IdProceso);
+                        }
+
                     // Si se está habilitando, se registra la nueva fecha de habilitación y se quita fecha de deshabilitación (solo si está vigente)...
                     } else if (notificacion.Habilitado == 1 && salida.Habilitado == 0 && salida.Vigente == 1) {
                         salida.Habilitado = 1;
                         salida.FechaHabilitacion = DateTimeOffset.Now;
                         salida.FechaDeshabilitacion = null;
+
+                        // Además, se programa proceso de notificación si no existen otras notificaciones habilitadas...
+                        int cantOtrasNotif = (await notificacionDAO.ObtenerPorTipoNotificacion(salida.IdTipoNotificacion, 1)).Where(n => n.Id != salida.Id).Count();
+                        if (cantOtrasNotif == 0) {
+                            TipoNotificacion? tipoNotificacion = await tipoNotificacionDAO.ObtenerUna(salida.IdTipoNotificacion) ?? throw new Exception($"No existe el tipo de notificación ID: {salida.IdTipoNotificacion}");
+                            TipoPeriodicidad? tipoPeriodicidad = await tipoPeriodicidadDAO.ObtenerUna(tipoNotificacion.IdTipoPeriodicidad) ?? throw new Exception($"No existe el tipo de periodicidad ID: {tipoNotificacion.IdTipoPeriodicidad}");
+
+                            SalKairosIngresarProceso kairosProceso = await kairos.IngresarProceso(new EntKairosIngresarProceso() {
+                                Nombre = $"Notificación {salida.IdTipoNotificacion} - {variableEntorno.Obtener("APP_NAME")}",
+                                Cron = tipoPeriodicidad.Cron,
+                                ArnProceso = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN")),
+                                ArnRol = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN")),
+                                Parametros = JsonSerializer.Serialize(new ParametroNotificacion { IdTipoNotificacion = salida.IdTipoNotificacion }, AppJsonSerializerContext.Default.ParametroNotificacion),
+                                Habilitado = true,
+                            });
+
+                            // Si no tenemos registrado el ID Proceso se actualiza... 
+                            if (tipoNotificacion.IdProceso != kairosProceso.IdProceso) {
+                                tipoNotificacion.IdProceso = kairosProceso.IdProceso;
+                                tipoNotificacion = await tipoNotificacionDAO.Modificar(tipoNotificacion);
+                            }
+                        }
+
                     }
 
                     salida = await notificacionDAO.Modificar(salida);
@@ -145,7 +201,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            });
+            }).WithOpenApi();
 
             return routes;
         }
