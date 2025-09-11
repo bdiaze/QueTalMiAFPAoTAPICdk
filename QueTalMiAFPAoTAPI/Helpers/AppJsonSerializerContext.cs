@@ -40,6 +40,10 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(HistorialNotificacion))]
     [JsonSerializable(typeof(List<HistorialNotificacion>))]
     [JsonSerializable(typeof(EntIngresarHistorialNotificacion))]
+    [JsonSerializable(typeof(EntHermesCorreoEnviar))]
+    [JsonSerializable(typeof(SalHermesCorreoEnviar))]
+    [JsonSerializable(typeof(EntKairosIngresarProceso))]
+    [JsonSerializable(typeof(SalKairosIngresarProceso))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }

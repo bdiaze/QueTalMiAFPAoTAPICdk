@@ -31,6 +31,11 @@ namespace Cdk
             string rdsSecurityGroupId = System.Environment.GetEnvironmentVariable("RDS_SECURITY_GROUP_ID") ?? throw new ArgumentNullException("RDS_SECURITY_GROUP_ID");
             string secretArnConnectionString = System.Environment.GetEnvironmentVariable("SECRET_ARN_CONNECTION_STRING") ?? throw new ArgumentNullException("SECRET_ARN_CONNECTION_STRING");
             string allowedDomains = System.Environment.GetEnvironmentVariable("ALLOWED_DOMAINS") ?? throw new ArgumentNullException("ALLOWED_DOMAINS");
+            string arnParHermesApiUrl = System.Environment.GetEnvironmentVariable("ARN_PARAMETER_HERMES_API_URL") ?? throw new ArgumentNullException("ARN_PARAMETER_HERMES_API_URL");
+            string arnParHermesApiKeyId = System.Environment.GetEnvironmentVariable("ARN_PARAMETER_HERMES_API_KEY_ID") ?? throw new ArgumentNullException("ARN_PARAMETER_HERMES_API_KEY_ID");
+            string arnParKairosApiUrl = System.Environment.GetEnvironmentVariable("ARN_PARAMETER_KAIROS_API_URL") ?? throw new ArgumentNullException("ARN_PARAMETER_KAIROS_API_URL");
+            string arnParKairosApiKeyId = System.Environment.GetEnvironmentVariable("ARN_PARAMETER_KAIROS_API_KEY_ID") ?? throw new ArgumentNullException("ARN_PARAMETER_KAIROS_API_KEY_ID");
+
 
             // Se obtiene la VPC y subnets...
             IVpc vpc = Vpc.FromLookup(this, $"{appName}Vpc", new VpcLookupOptions {
@@ -95,6 +100,10 @@ namespace Cdk
                 Tier = ParameterTier.STANDARD,
             });
 
+            // Se obtiene ARN del API Key...
+            IStringParameter strParHermesApiKeyId = StringParameter.FromStringParameterArn(this, $"{appName}StringParameterHermesApiKeyId", arnParHermesApiKeyId);
+            IStringParameter strParKairosApiKeyId = StringParameter.FromStringParameterArn(this, $"{appName}StringParameterKairosApiKeyId", arnParKairosApiKeyId);
+
             // Creación de role para la función lambda...
             IRole roleLambda = new Role(this, $"{appName}APILambdaRole", new RoleProps {
                 RoleName = $"{appName}APILambdaRole",
@@ -125,6 +134,10 @@ namespace Cdk
                                     ],
                                     Resources = [
                                         stringParameterApiAllowedDomains.ParameterArn,
+                                        arnParHermesApiUrl,
+                                        arnParHermesApiKeyId,
+                                        arnParKairosApiUrl,
+                                        arnParKairosApiKeyId,
 
                                     ],
                                 }),
@@ -135,6 +148,16 @@ namespace Cdk
                                     ],
                                     Resources = [
                                         $"{bucket.BucketArn}/*",
+                                    ],
+                                }),
+                                new PolicyStatement(new PolicyStatementProps{
+                                    Sid = $"{appName}AccessToApiKey",
+                                    Actions = [
+                                        "apigateway:GET"
+                                    ],
+                                    Resources = [
+                                        $"arn:aws:apigateway:{this.Region}::/apikeys/{strParHermesApiKeyId.StringValue}",
+                                        $"arn:aws:apigateway:{this.Region}::/apikeys/{strParKairosApiKeyId.StringValue}",
                                     ],
                                 }),
                             ]
@@ -158,6 +181,10 @@ namespace Cdk
                     { "BUCKET_NAME_LARGE_RESPONSES", bucket.BucketName },
                     { "SECRET_ARN_CONNECTION_STRING", secretArnConnectionString },
                     { "PARAMETER_ARN_API_ALLOWED_DOMAINS", stringParameterApiAllowedDomains.ParameterArn },
+                    { "ARN_PARAMETER_HERMES_API_URL", arnParHermesApiUrl },
+                    { "ARN_PARAMETER_HERMES_API_KEY_ID", arnParHermesApiKeyId },
+                    { "ARN_PARAMETER_KAIROS_API_URL", arnParKairosApiUrl },
+                    { "ARN_PARAMETER_KAIROS_API_KEY_ID", arnParKairosApiKeyId },
                 },
                 Vpc = vpc,
                 VpcSubnets = new SubnetSelection {
