@@ -42,13 +42,15 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                 "\"FECHA\", " +
                 "\"VALOR\", " +
                 "\"TIPO_COMISION\", " +
-                "\"TIPO_VALOR\"" +
+                "\"TIPO_VALOR\", " +
+                "\"FECHA_CREACION\"" +
                 ") VALUES (" +
                 "@Afp, " +
                 "@Fecha, " +
                 "@Valor, " +
                 "@TipoComision, " +
-                "@TipoValor" +
+                "@TipoValor, " +
+                "@FechaCreacion" +
                 ") " +
                 "RETURNING \"ID\";";
 
@@ -60,6 +62,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             command.Parameters.AddWithValue("@Valor", comision.Valor);
             command.Parameters.AddWithValue("@TipoComision", comision.TipoComision);
             command.Parameters.AddWithValue("@TipoValor", comision.TipoValor);
+            command.Parameters.AddWithValue("@FechaCreacion", DateTimeOffset.UtcNow);
 
             _ = (long)(await command.ExecuteScalarAsync())!;
         }
@@ -70,7 +73,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                 "\"FECHA\" = @Fecha, " +
                 "\"VALOR\" = @Valor, " +
                 "\"TIPO_COMISION\" = @TipoComision, " +
-                "\"TIPO_VALOR\" = @TipoValor " +
+                "\"TIPO_VALOR\" = @TipoValor, " +
+                "\"FECHA_MODIFICACION\" = @FechaModificacion " +
                 "WHERE \"ID\" = @Id;";
 
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
@@ -82,6 +86,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             command.Parameters.AddWithValue("@Valor", comision.Valor);
             command.Parameters.AddWithValue("@TipoComision", comision.TipoComision);
             command.Parameters.AddWithValue("@TipoValor", comision.TipoValor);
+            command.Parameters.AddWithValue("@FechaModificacion", DateTimeOffset.UtcNow);
 
             await command.ExecuteNonQueryAsync();
         }

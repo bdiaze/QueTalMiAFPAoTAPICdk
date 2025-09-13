@@ -41,12 +41,14 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             string queryString = "INSERT INTO \"QueTalMiAFP\".\"CUOTA\"(\"AFP\", " +
                 "\"FECHA\", " +
                 "\"FONDO\", " +
-                "\"VALOR\"" +
+                "\"VALOR\", " +
+                "\"FECHA_CREACION\"" +
                 ") VALUES (" +
                 "@Afp, " +
                 "@Fecha, " +
                 "@Fondo, " +
-                "@Valor" +
+                "@Valor, " +
+                "@FechaCreacion" +
                 ") " +
                 "RETURNING \"ID\";";
 
@@ -57,6 +59,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             command.Parameters.AddWithValue("@Fecha", cuota.Fecha);
             command.Parameters.AddWithValue("@Fondo", cuota.Fondo);
             command.Parameters.AddWithValue("@Valor", cuota.Valor);
+            command.Parameters.AddWithValue("@FechaCreacion", DateTimeOffset.UtcNow);
 
             _ = (long)(await command.ExecuteScalarAsync())!;
         }
@@ -66,7 +69,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                 "SET \"AFP\" = @Afp, " +
                 "\"FECHA\" = @Fecha, " +
                 "\"FONDO\" = @Fondo, " +
-                "\"VALOR\" = @Valor " +
+                "\"VALOR\" = @Valor, " +
+                "\"FECHA_MODIFICACION\" = @FechaModificacion " +
                 "WHERE \"ID\" = @Id;";
 
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
@@ -77,6 +81,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             command.Parameters.AddWithValue("@Fecha", cuota.Fecha);
             command.Parameters.AddWithValue("@Fondo", cuota.Fondo);
             command.Parameters.AddWithValue("@Valor", cuota.Valor);
+            command.Parameters.AddWithValue("@FechaModificacion", DateTimeOffset.UtcNow);
 
             await command.ExecuteNonQueryAsync();
         }

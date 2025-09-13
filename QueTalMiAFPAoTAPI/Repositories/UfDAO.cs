@@ -35,10 +35,12 @@ namespace QueTalMiAFPAoTAPI.Repositories {
         public async Task InsertarUf(Uf uf) {
             string queryString = "INSERT INTO \"QueTalMiAFP\".\"UF\"(" +
                 "\"FECHA\", " +
-                "\"VALOR\"" +
+                "\"VALOR\", " +
+                "\"FECHA_CREACION\"" +
                 ") VALUES (" +
                 "@Fecha, " +
-                "@Valor" +
+                "@Valor, " +
+                "@FechaCreacion" +
                 ") " +
                 "RETURNING \"ID\";";
 
@@ -47,6 +49,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
             command.Parameters.AddWithValue("@Fecha", uf.Fecha);
             command.Parameters.AddWithValue("@Valor", uf.Valor);
+            command.Parameters.AddWithValue("@FechaCreacion", DateTimeOffset.UtcNow);
 
             _ = (long)(await command.ExecuteScalarAsync())!;
         }
@@ -54,7 +57,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
         public async Task ActualizarUf(Uf uf) {
             string queryString = "UPDATE \"QueTalMiAFP\".\"UF\" " +
                 "SET \"FECHA\" = @Fecha, " +
-                "\"VALOR\" = @Valor " +
+                "\"VALOR\" = @Valor, " +
+                "\"FECHA_MODIFICACION\" = @FechaModificacion " +
                 "WHERE \"ID\" = @Id;";
 
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
@@ -63,6 +67,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             command.Parameters.AddWithValue("@Id", uf.Id!);
             command.Parameters.AddWithValue("@Fecha", uf.Fecha);
             command.Parameters.AddWithValue("@Valor", uf.Valor);
+            command.Parameters.AddWithValue("@FechaModificacion", DateTimeOffset.UtcNow);
 
             await command.ExecuteNonQueryAsync();
         }
