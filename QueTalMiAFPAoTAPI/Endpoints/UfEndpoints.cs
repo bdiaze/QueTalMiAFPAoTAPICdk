@@ -14,7 +14,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapActualizacionMasivaEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapPost("/ActualizacionMasiva", async (EntActualizacionMasivaUf ufsExtraidas, UfDAO ufDAO) => {
+            routes.MapPost("/ActualizacionMasiva", async (EntActualizacionMasivaUf ufsExtraidas, UfDAO ufDAO, Repositories.DynamoDB.UfDAO dynamoUfDao) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
@@ -33,6 +33,28 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                             await ufDAO.ActualizarUf(ufExistente);
                             retorno.CantUfsActualizadas++;
                         }
+                    }
+
+                    // Se insertan o actualizan los valores en DynamoDB...
+                    Dictionary<DateOnly, Entities.DynamoDB.Uf> ufsExistentesDynamo = await dynamoUfDao.ObtenerVarias([.. ufsExtraidas.Ufs.Select(u => DateOnly.FromDateTime(u.Fecha))], true);
+                    HashSet<Entities.DynamoDB.Uf> ufsInsertarOActualizar = [];
+                    foreach (Uf uf in ufsExtraidas.Ufs) {
+                        if (ufsExistentesDynamo.TryGetValue(DateOnly.FromDateTime(uf.Fecha), out Entities.DynamoDB.Uf? ufExistenteDynamo)) {
+                            if (ufExistenteDynamo != null && ufExistenteDynamo.Valor != uf.Valor) {
+                                ufExistenteDynamo.Valor = uf.Valor;
+                                ufExistenteDynamo.FechaModificacion = DateTimeOffset.UtcNow;
+                                ufsInsertarOActualizar.Add(ufExistenteDynamo);
+                            }
+                        } else {
+                            ufsInsertarOActualizar.Add(new Entities.DynamoDB.Uf { 
+                                Fecha = DateOnly.FromDateTime(uf.Fecha), 
+                                Valor = uf.Valor,
+                                FechaCreacion = DateTimeOffset.UtcNow
+                            });
+                        }
+                    }
+                    if (ufsInsertarOActualizar.Count > 0) {
+                        await dynamoUfDao.InsertarOActualizarVarias(ufsInsertarOActualizar);
                     }
 
                     LambdaLogger.Log(

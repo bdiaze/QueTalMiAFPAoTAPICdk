@@ -1,4 +1,5 @@
 using Amazon.APIGateway;
+using Amazon.DynamoDBv2;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.Serialization.SystemTextJson;
 using Amazon.S3;
@@ -38,6 +39,7 @@ builder.Services.AddSingleton<IAmazonSimpleSystemsManagement, AmazonSimpleSystem
 builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
 builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
 builder.Services.AddSingleton<IAmazonAPIGateway, AmazonAPIGatewayClient>();
+builder.Services.AddSingleton<IAmazonDynamoDB, AmazonDynamoDBClient>();
 #endregion
 
 #region Singleton Helpers
@@ -63,6 +65,8 @@ builder.Services.AddSingleton<HistorialNotificacionDAO>();
 builder.Services.AddSingleton<NotificacionDAO>();
 builder.Services.AddSingleton<TipoNotificacionDAO>();
 builder.Services.AddSingleton<TipoPeriodicidadDAO>();
+
+builder.Services.AddSingleton<QueTalMiAFPAoTAPI.Repositories.DynamoDB.UfDAO>();
 #endregion
 
 var app = builder.Build();
