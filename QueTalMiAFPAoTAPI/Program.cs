@@ -35,11 +35,41 @@ builder.Services.AddSwaggerGen(c => {
 });
 
 #region Singleton AWS Services
-builder.Services.AddSingleton<IAmazonSimpleSystemsManagement, AmazonSimpleSystemsManagementClient>();
-builder.Services.AddSingleton<IAmazonSecretsManager, AmazonSecretsManagerClient>();
-builder.Services.AddSingleton<IAmazonS3, AmazonS3Client>();
-builder.Services.AddSingleton<IAmazonAPIGateway, AmazonAPIGatewayClient>();
-builder.Services.AddSingleton<IAmazonDynamoDB, AmazonDynamoDBClient>();
+builder.Services.AddSingleton<IAmazonSimpleSystemsManagement>(sp => {
+    AmazonSimpleSystemsManagementConfig config = new() {
+        ConnectTimeout = TimeSpan.FromSeconds(5),
+        Timeout = TimeSpan.FromSeconds(25)
+    };
+    return new AmazonSimpleSystemsManagementClient(config);
+});
+builder.Services.AddSingleton<IAmazonSecretsManager>(sp => {
+    AmazonSecretsManagerConfig config = new() {
+        ConnectTimeout = TimeSpan.FromSeconds(5),
+        Timeout = TimeSpan.FromSeconds(25)
+    };
+    return new AmazonSecretsManagerClient(config);
+});
+builder.Services.AddSingleton<IAmazonS3>(sp => {
+    AmazonS3Config config = new() {
+        ConnectTimeout = TimeSpan.FromSeconds(5),
+        Timeout = TimeSpan.FromSeconds(25)
+    };
+    return new AmazonS3Client(config);
+});
+builder.Services.AddSingleton<IAmazonAPIGateway>(sp => {
+    AmazonAPIGatewayConfig config = new() {
+        ConnectTimeout = TimeSpan.FromSeconds(5),
+        Timeout = TimeSpan.FromSeconds(25)
+    };
+    return new AmazonAPIGatewayClient(config);
+});
+builder.Services.AddSingleton<IAmazonDynamoDB>(sp => {
+    AmazonDynamoDBConfig config = new() {
+        ConnectTimeout = TimeSpan.FromSeconds(5),
+        Timeout = TimeSpan.FromSeconds(25)
+    };
+    return new AmazonDynamoDBClient(config);
+});
 #endregion
 
 #region Singleton Helpers
