@@ -40,7 +40,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     HashSet<Entities.DynamoDB.Uf> ufsInsertarOActualizar = [];
                     foreach (Uf uf in ufsExtraidas.Ufs) {
                         if (ufsExistentesDynamo.TryGetValue(DateOnly.FromDateTime(uf.Fecha), out Entities.DynamoDB.Uf? ufExistenteDynamo)) {
-                            if (ufExistenteDynamo != null && ufExistenteDynamo.Valor != uf.Valor) {
+                            if (ufExistenteDynamo.Valor != uf.Valor) {
                                 ufExistenteDynamo.Valor = uf.Valor;
                                 ufExistenteDynamo.FechaModificacion = DateTimeOffset.UtcNow;
                                 ufsInsertarOActualizar.Add(ufExistenteDynamo);

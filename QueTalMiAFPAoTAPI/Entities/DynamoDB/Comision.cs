@@ -8,29 +8,56 @@ namespace QueTalMiAFPAoTAPI.Entities.DynamoDB {
         public required byte TipoComision { get; set; }
         public required byte TipoValor { get; set; }
         public required decimal Valor { get; set; }
+        public DateTimeOffset? FechaCreacion { get; set; }
+        public DateTimeOffset? FechaModificacion { get; set; }
 
-        public override string PK => $"COMISION#{Afp.ToUpperInvariant()}#{TipoComision}";
+        public override string PK => $"COMISION#{Afp}#{TipoComision.ToString(CultureInfo.InvariantCulture)}";
 
         public override string SK => $"{Fecha.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}";
 
         public override Dictionary<string, AttributeValue> ToItem() {
-            return this.Key.Concat(new Dictionary<string, AttributeValue>() {
-                { "Afp", new AttributeValue { S = $"{Afp.ToUpperInvariant()}" } },
+            Dictionary<string, AttributeValue> item = this.Key.Concat(new Dictionary<string, AttributeValue>() {
+                { "Afp", new AttributeValue { S = $"{Afp}" } },
                 { "Fecha", new AttributeValue { S = $"{Fecha.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}" } },
                 { "TipoComision", new AttributeValue { N = $"{TipoComision.ToString(CultureInfo.InvariantCulture)}" } },
                 { "TipoValor", new AttributeValue { N = $"{TipoValor.ToString(CultureInfo.InvariantCulture)}" } },
                 { "Valor", new AttributeValue { N = $"{Valor.ToString(CultureInfo.InvariantCulture)}" } },
+                { "FechaCreacion", new AttributeValue { NULL = true  } },
+                { "FechaModificacion", new AttributeValue { NULL = true  } },
             }).ToDictionary();
+
+            if (FechaCreacion != null) {
+                item["FechaCreacion"] = new AttributeValue { S = $"{FechaCreacion.Value.ToString("o", CultureInfo.InvariantCulture)}" };
+            }
+
+            if (FechaModificacion != null) {
+                item["FechaModificacion"] = new AttributeValue { S = $"{FechaModificacion.Value.ToString("o", CultureInfo.InvariantCulture)}" };
+            }
+
+            return item;
         }
 
         public static Comision FromItem(Dictionary<string, AttributeValue> item) {
             return new Comision() {
-                Afp = item["Afp"].S.ToUpperInvariant(),
+                Afp = item["Afp"].S,
                 Fecha = DateOnly.ParseExact(item["Fecha"].S, "yyyy-MM-dd", CultureInfo.InvariantCulture),
                 TipoComision = byte.Parse(item["TipoComision"].N, CultureInfo.InvariantCulture),
                 TipoValor = byte.Parse(item["TipoValor"].N, CultureInfo.InvariantCulture),
                 Valor = decimal.Parse(item["Valor"].N, CultureInfo.InvariantCulture),
+                FechaCreacion = item["FechaCreacion"].S != null ? DateTimeOffset.ParseExact(item["FechaCreacion"].S, "o", CultureInfo.InvariantCulture) : null,
+                FechaModificacion = item["FechaModificacion"].S != null ? DateTimeOffset.ParseExact(item["FechaModificacion"].S, "o", CultureInfo.InvariantCulture) : null,
             };
+        }
+
+        public override bool Equals(object? obj) {
+            if (obj is Comision other) {
+                return Afp == other.Afp && TipoComision == other.TipoComision && Fecha == other.Fecha;
+            }
+            return false;
+        }
+
+        public override int GetHashCode() {
+            return HashCode.Combine(Afp, TipoComision, Fecha);
         }
     }
 }

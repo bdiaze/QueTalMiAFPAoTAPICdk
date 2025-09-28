@@ -97,6 +97,8 @@ builder.Services.AddSingleton<TipoNotificacionDAO>();
 builder.Services.AddSingleton<TipoPeriodicidadDAO>();
 
 builder.Services.AddSingleton<QueTalMiAFPAoTAPI.Repositories.DynamoDB.UfDAO>();
+builder.Services.AddSingleton<QueTalMiAFPAoTAPI.Repositories.DynamoDB.ComisionDAO>();
+builder.Services.AddSingleton<QueTalMiAFPAoTAPI.Repositories.DynamoDB.CuotaDAO>();
 #endregion
 
 var app = builder.Build();

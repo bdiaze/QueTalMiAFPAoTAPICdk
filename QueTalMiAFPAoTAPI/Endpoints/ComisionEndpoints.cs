@@ -15,7 +15,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapActualizacionMasivaEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapPost("/ActualizacionMasiva", async (EntActualizacionMasivaComision comisionesExtraidas, ComisionDAO comisionDAO) => {
+            routes.MapPost("/ActualizacionMasiva", async (EntActualizacionMasivaComision comisionesExtraidas, ComisionDAO comisionDAO, Repositories.DynamoDB.ComisionDAO dynamoComisionDao) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
@@ -36,6 +36,35 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                             await comisionDAO.ActualizarComision(comisionExistente);
                             retorno.CantComisionesActualizadas++;
                         }
+                    }
+
+                    // Se insertan o actualizan los valores en DynamoDB...
+                    Dictionary<string, Dictionary<byte, Dictionary<DateOnly, Entities.DynamoDB.Comision>>> comisionesExistentesDynamo =  await dynamoComisionDao.ObtenerVarias([.. comisionesExtraidas.Comisiones.Select(c => (c.Afp, c.TipoComision, DateOnly.FromDateTime(c.Fecha)))], true);
+                    HashSet<Entities.DynamoDB.Comision> comisionesInsertarOActualizar = [];
+                    foreach (Comision comision in comisionesExtraidas.Comisiones) {
+                        if (comisionesExistentesDynamo.TryGetValue(comision.Afp, out Dictionary<byte, Dictionary<DateOnly, Entities.DynamoDB.Comision>>? dictTipoComision) && 
+                            dictTipoComision.TryGetValue(comision.TipoComision, out Dictionary<DateOnly, Entities.DynamoDB.Comision>? dictFechas) && 
+                            dictFechas.TryGetValue(DateOnly.FromDateTime(comision.Fecha), out Entities.DynamoDB.Comision? comisionExistenteDynamo)
+                        ) {
+                            if (comisionExistenteDynamo.Valor != comision.Valor || comisionExistenteDynamo.TipoValor != comision.TipoValor) {
+                                comisionExistenteDynamo.Valor = comision.Valor;
+                                comisionExistenteDynamo.TipoValor = comision.TipoValor;
+                                comisionExistenteDynamo.FechaModificacion = DateTimeOffset.UtcNow;
+                                comisionesInsertarOActualizar.Add(comisionExistenteDynamo);
+                            }
+                        } else {
+                            comisionesInsertarOActualizar.Add(new Entities.DynamoDB.Comision { 
+                                Afp = comision.Afp,
+                                TipoComision = comision.TipoComision,
+                                Fecha = DateOnly.FromDateTime(comision.Fecha),
+                                Valor = comision.Valor,
+                                TipoValor = comision.TipoValor,
+                                FechaCreacion = DateTimeOffset.UtcNow
+                            });
+                        }
+                    }
+                    if (comisionesInsertarOActualizar.Count > 0) {
+                        await dynamoComisionDao.InsertarOActualizarVarias(comisionesInsertarOActualizar);
                     }
 
                     LambdaLogger.Log(
