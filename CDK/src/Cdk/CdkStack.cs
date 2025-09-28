@@ -1,6 +1,7 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.APIGateway;
 using Amazon.CDK.AWS.Apigatewayv2;
+using Amazon.CDK.AWS.DynamoDB;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
@@ -10,6 +11,7 @@ using Amazon.CDK.AWS.SSM;
 using Constructs;
 using System;
 using System.Collections.Generic;
+using Attribute = Amazon.CDK.AWS.DynamoDB.Attribute;
 using LogGroupLogDestination = Amazon.CDK.AWS.APIGateway.LogGroupLogDestination;
 using StageOptions = Amazon.CDK.AWS.APIGateway.StageOptions;
 
@@ -101,6 +103,22 @@ namespace Cdk
                 Tier = ParameterTier.STANDARD,
             });
 
+            // Se crea DynamoDB de la aplicación...
+            Table singleTable = new(this, $"{appName}SingleTable", new TableProps {
+                TableName = $"{appName}",
+                PartitionKey = new Attribute {
+                    Name = "PK",
+                    Type = AttributeType.STRING
+                },
+                SortKey = new Attribute { 
+                    Name = "SK",
+                    Type = AttributeType.STRING,
+                },
+                DeletionProtection = true,
+                BillingMode = BillingMode.PAY_PER_REQUEST,
+                RemovalPolicy = RemovalPolicy.DESTROY,
+            });
+
             // Se obtiene ARN del API Key...
             IStringParameter strParHermesApiKeyId = StringParameter.FromStringParameterArn(this, $"{appName}StringParameterHermesApiKeyId", arnParHermesApiKeyId);
             IStringParameter strParKairosApiKeyId = StringParameter.FromStringParameterArn(this, $"{appName}StringParameterKairosApiKeyId", arnParKairosApiKeyId);
@@ -162,6 +180,23 @@ namespace Cdk
                                         $"arn:aws:apigateway:{this.Region}::/apikeys/{strParKairosApiKeyId.StringValue}",
                                     ],
                                 }),
+                                new PolicyStatement(new PolicyStatementProps{
+                                    Sid = $"{appName}AccessToDynamoDB",
+                                    Actions = [
+                                        "dynamodb:GetItem",
+                                        "dynamodb:BatchGetItem",
+                                        "dynamodb:Query",
+                                        "dynamodb:Scan",
+                                        "dynamodb:PutItem",
+                                        "dynamodb:UpdateItem",
+                                        "dynamodb:DeleteItem",
+                                        "dynamodb:BatchWriteItem",
+                                    ],
+                                    Resources = [
+                                        singleTable.TableArn,
+                                        $"{singleTable.TableArn}/index/*",
+                                    ],
+                                }),
                             ]
                         })
                     }
@@ -189,6 +224,7 @@ namespace Cdk
                     { "ARN_PARAMETER_KAIROS_API_KEY_ID", arnParKairosApiKeyId },
                     { "ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN", arnParNotifLambdaArn },
                     { "ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN", arnParNotifEjecRoleArn },
+                    { "NAME_DYNAMODB_SINGLE_TABLE", singleTable.TableName }
                 },
                 Vpc = vpc,
                 VpcSubnets = new SubnetSelection {
