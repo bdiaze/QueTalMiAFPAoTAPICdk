@@ -15,7 +15,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapActualizacionMasivaEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapPost("/ActualizacionMasiva", async (EntActualizacionMasivaComision comisionesExtraidas, ComisionDAO comisionDAO, Repositories.DynamoDB.ComisionDAO dynamoComisionDao) => {
+            routes.MapPost("/ActualizacionMasiva", async (EntActualizacionMasivaComision comisionesExtraidas, ComisionDAO comisionDAO/*, Repositories.DynamoDB.ComisionDAO dynamoComisionDao*/) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
@@ -39,6 +39,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     }
 
                     // Se insertan o actualizan los valores en DynamoDB...
+                    /*
                     Dictionary<string, Dictionary<byte, Dictionary<DateOnly, Entities.DynamoDB.Comision>>> comisionesExistentesDynamo =  await dynamoComisionDao.ObtenerVarias([.. comisionesExtraidas.Comisiones.Select(c => (c.Afp, c.TipoComision, DateOnly.FromDateTime(c.Fecha)))], true);
                     HashSet<Entities.DynamoDB.Comision> comisionesInsertarOActualizar = [];
                     foreach (Comision comision in comisionesExtraidas.Comisiones) {
@@ -66,6 +67,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     if (comisionesInsertarOActualizar.Count > 0) {
                         await dynamoComisionDao.InsertarOActualizarVarias(comisionesInsertarOActualizar);
                     }
+                    */
 
                     LambdaLogger.Log(
                         $"[POST] - [Comision] - [ActualizacionMasiva] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +

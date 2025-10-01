@@ -104,6 +104,7 @@ namespace Cdk
             });
 
             // Se crea DynamoDB de la aplicación...
+            /*
             Table singleTable = new(this, $"{appName}SingleTable", new TableProps {
                 TableName = $"{appName}",
                 PartitionKey = new Attribute {
@@ -118,6 +119,7 @@ namespace Cdk
                 BillingMode = BillingMode.PAY_PER_REQUEST,
                 RemovalPolicy = RemovalPolicy.DESTROY,
             });
+            */
 
             // Se obtiene ARN del API Key...
             IStringParameter strParHermesApiKeyId = StringParameter.FromStringParameterArn(this, $"{appName}StringParameterHermesApiKeyId", arnParHermesApiKeyId);
@@ -180,6 +182,7 @@ namespace Cdk
                                         $"arn:aws:apigateway:{this.Region}::/apikeys/{strParKairosApiKeyId.StringValue}",
                                     ],
                                 }),
+                                /*
                                 new PolicyStatement(new PolicyStatementProps{
                                     Sid = $"{appName}AccessToDynamoDB",
                                     Actions = [
@@ -197,6 +200,7 @@ namespace Cdk
                                         $"{singleTable.TableArn}/index/*",
                                     ],
                                 }),
+                                */
                             ]
                         })
                     }
@@ -224,7 +228,7 @@ namespace Cdk
                     { "ARN_PARAMETER_KAIROS_API_KEY_ID", arnParKairosApiKeyId },
                     { "ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN", arnParNotifLambdaArn },
                     { "ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN", arnParNotifEjecRoleArn },
-                    { "NAME_DYNAMODB_SINGLE_TABLE", singleTable.TableName }
+                    // { "NAME_DYNAMODB_SINGLE_TABLE", singleTable.TableName }
                 },
                 Vpc = vpc,
                 VpcSubnets = new SubnetSelection {

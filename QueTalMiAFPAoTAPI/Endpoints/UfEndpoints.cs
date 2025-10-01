@@ -14,7 +14,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapActualizacionMasivaEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapPost("/ActualizacionMasiva", async (EntActualizacionMasivaUf ufsExtraidas, UfDAO ufDAO, Repositories.DynamoDB.UfDAO dynamoUfDao) => {
+            routes.MapPost("/ActualizacionMasiva", async (EntActualizacionMasivaUf ufsExtraidas, UfDAO ufDAO/*, Repositories.DynamoDB.UfDAO dynamoUfDao*/) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
@@ -36,6 +36,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     }
 
                     // Se insertan o actualizan los valores en DynamoDB...
+                    /*
                     Dictionary<DateOnly, Entities.DynamoDB.Uf> ufsExistentesDynamo = await dynamoUfDao.ObtenerVarias([.. ufsExtraidas.Ufs.Select(u => DateOnly.FromDateTime(u.Fecha))], true);
                     HashSet<Entities.DynamoDB.Uf> ufsInsertarOActualizar = [];
                     foreach (Uf uf in ufsExtraidas.Ufs) {
@@ -56,6 +57,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     if (ufsInsertarOActualizar.Count > 0) {
                         await dynamoUfDao.InsertarOActualizarVarias(ufsInsertarOActualizar);
                     }
+                    */
 
                     LambdaLogger.Log(
                         $"[POST] - [Uf] - [ActualizacionMasiva] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
