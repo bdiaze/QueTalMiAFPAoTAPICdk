@@ -247,6 +247,8 @@ namespace Cdk
                     { "ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN", arnParNotifLambdaArn },
                     { "ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN", arnParNotifEjecRoleArn },
                     // { "NAME_DYNAMODB_SINGLE_TABLE", singleTable.TableName }
+                    { "ARN_PARAMETER_APIGATEWAY_API_ID", $"arn:aws:ssm:{this.Region}:{this.Account}:parameter/{appName}/ApiGateway/ApiId" },
+                    { "ARN_PARAMETER_APIGATEWAY_STAGE_NAME", $"arn:aws:ssm:{this.Region}:{this.Account}:parameter/{appName}/ApiGateway/StageName" },
                 },
                 Vpc = vpc,
                 VpcSubnets = new SubnetSelection {
@@ -281,8 +283,37 @@ namespace Cdk
                 },
             });
 
-            function.AddEnvironment("APIGATEWAY_API_ID", lambdaRestApi.RestApiId);
-            function.AddEnvironment("APIGATEWAY_STAGE_NAME", lambdaRestApi.DeploymentStage.StageName);
+            // Se crean parámetros que se usarán para crear los API Keys...
+            StringParameter stringParameterApiId = new(this, $"{appName}StringParameterApiId", new StringParameterProps {
+                ParameterName = $"/{appName}/ApiGateway/ApiId",
+                Description = $"API ID de la aplicacion {appName}",
+                StringValue = lambdaRestApi.RestApiId,
+                Tier = ParameterTier.STANDARD,
+            });
+            StringParameter stringParameterStageName = new(this, $"{appName}StringParameterStageName", new StringParameterProps {
+                ParameterName = $"/{appName}/ApiGateway/StageName",
+                Description = $"Stage Name de la aplicacion {appName}",
+                StringValue = lambdaRestApi.DeploymentStage.StageName,
+                Tier = ParameterTier.STANDARD,
+            });
+
+            _ = new ManagedPolicy(this, $"{appName}APIManagedPolicy", new ManagedPolicyProps{ 
+                ManagedPolicyName = $"{appName}APIManagedPolicy",
+                Description = $"Politica para acceder a los parametros de API Gateway de {appName}",
+                Roles = [roleLambda],
+                Statements = [
+                    new PolicyStatement(new PolicyStatementProps {
+                        Sid = $"{appName}AccessToParameterStore",
+                        Actions = [ 
+                            "ssm:GetParameter"
+                        ],
+                        Resources = [
+                            stringParameterApiId.ParameterArn,
+                            stringParameterStageName.ParameterArn,
+                        ],
+                    }),
+                ],
+            });
 
             // Creación de la CfnApiMapping para el API Gateway...
             CfnApiMapping apiMapping = new(this, $"{appName}APIApiMapping", new CfnApiMappingProps {
