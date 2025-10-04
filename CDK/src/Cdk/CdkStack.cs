@@ -124,7 +124,7 @@ namespace Cdk
             // Se obtiene ARN del API Key...
             IStringParameter strParHermesApiKeyId = StringParameter.FromStringParameterArn(this, $"{appName}StringParameterHermesApiKeyId", arnParHermesApiKeyId);
             IStringParameter strParKairosApiKeyId = StringParameter.FromStringParameterArn(this, $"{appName}StringParameterKairosApiKeyId", arnParKairosApiKeyId);
-
+                                    
             // Creación de role para la función lambda...
             IRole roleLambda = new Role(this, $"{appName}APILambdaRole", new RoleProps {
                 RoleName = $"{appName}APILambdaRole",
@@ -160,7 +160,7 @@ namespace Cdk
                                         arnParKairosApiUrl,
                                         arnParKairosApiKeyId,
                                         arnParNotifLambdaArn,
-                                        arnParNotifEjecRoleArn
+                                        arnParNotifEjecRoleArn,
                                     ],
                                 }),
                                 new PolicyStatement(new PolicyStatementProps{
@@ -181,6 +181,24 @@ namespace Cdk
                                         $"arn:aws:apigateway:{this.Region}::/apikeys/{strParHermesApiKeyId.StringValue}",
                                         $"arn:aws:apigateway:{this.Region}::/apikeys/{strParKairosApiKeyId.StringValue}",
                                     ],
+                                }),
+                                new PolicyStatement(new PolicyStatementProps{
+                                    Sid = $"{appName}AccessToOwnApiKeys",
+                                    Actions = [
+                                        "apigateway:GET",
+                                        "apigateway:POST",
+                                        "apigateway:DELETE"
+                                    ],
+                                    Resources = [
+                                        $"arn:aws:apigateway:{this.Region}::/usageplans/*",
+                                        $"arn:aws:apigateway:{this.Region}::/apikeys/*",
+                                        $"arn:aws:apigateway:{this.Region}::/usageplans/*/keys/*",
+                                    ],
+                                    Conditions = new Dictionary<string, object> {
+                                        { "StringEquals",  new Dictionary<string, object> {
+                                            { "aws:ResourceTag/AppName", $"{appName}" }
+                                        } }
+                                    }
                                 }),
                                 /*
                                 new PolicyStatement(new PolicyStatementProps{
@@ -261,6 +279,41 @@ namespace Cdk
                 DefaultMethodOptions = new MethodOptions {
                     ApiKeyRequired = true,
                 },
+            });
+
+            // Se crean parámetros que se usarán para crear los API Keys...
+            StringParameter stringParameterApiId = new(this, $"{appName}StringParameterApiId", new StringParameterProps {
+                ParameterName = $"/{appName}/ApiGateway/ApiId",
+                Description = $"API ID de la aplicacion {appName}",
+                StringValue = lambdaRestApi.RestApiId,
+                Tier = ParameterTier.STANDARD,
+            });
+            StringParameter stringParameterApiStage = new(this, $"{appName}StringParameterApiStage", new StringParameterProps {
+                ParameterName = $"/{appName}/ApiGateway/ApiStage",
+                Description = $"API Stage de la aplicacion {appName}",
+                StringValue = lambdaRestApi.DeploymentStage.StageName,
+                Tier = ParameterTier.STANDARD,
+            });
+
+            function.AddEnvironment("ARN_PARAMETER_APIGATEWAY_API_ID", stringParameterApiId.ParameterArn);
+            function.AddEnvironment("ARN_PARAMETER_APIGATEWAY_API_STAGE", stringParameterApiStage.ParameterArn);
+
+            _ = new ManagedPolicy(this, $"{appName}APIManagedPolicy", new ManagedPolicyProps{ 
+                ManagedPolicyName = $"{appName}APIManagedPolicy",
+                Description = $"Politica para acceder a los parametros de API Gateway de {appName}",
+                Roles = [roleLambda],
+                Statements = [
+                    new PolicyStatement(new PolicyStatementProps {
+                        Sid = $"{appName}AccessToParameterStore",
+                        Actions = [ 
+                            "ssm:GetParameter"
+                        ],
+                        Resources = [
+                            stringParameterApiId.ParameterArn,
+                            stringParameterApiStage.ParameterArn,
+                        ],
+                    }),
+                ],
             });
 
             // Creación de la CfnApiMapping para el API Gateway...
