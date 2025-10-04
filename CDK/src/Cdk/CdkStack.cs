@@ -288,33 +288,18 @@ namespace Cdk
                 StringValue = lambdaRestApi.RestApiId,
                 Tier = ParameterTier.STANDARD,
             });
+            stringParameterApiId.GrantRead(function);
+
             StringParameter stringParameterApiStage = new(this, $"{appName}StringParameterApiStage", new StringParameterProps {
                 ParameterName = $"/{appName}/ApiGateway/ApiStage",
                 Description = $"API Stage de la aplicacion {appName}",
                 StringValue = lambdaRestApi.DeploymentStage.StageName,
                 Tier = ParameterTier.STANDARD,
             });
+            stringParameterApiStage.GrantRead(function);
 
             function.AddEnvironment("ARN_PARAMETER_APIGATEWAY_API_ID", stringParameterApiId.ParameterArn);
             function.AddEnvironment("ARN_PARAMETER_APIGATEWAY_API_STAGE", stringParameterApiStage.ParameterArn);
-
-            _ = new ManagedPolicy(this, $"{appName}APIManagedPolicy", new ManagedPolicyProps{ 
-                ManagedPolicyName = $"{appName}APIManagedPolicy",
-                Description = $"Politica para acceder a los parametros de API Gateway de {appName}",
-                Roles = [roleLambda],
-                Statements = [
-                    new PolicyStatement(new PolicyStatementProps {
-                        Sid = $"{appName}AccessToParameterStore",
-                        Actions = [ 
-                            "ssm:GetParameter"
-                        ],
-                        Resources = [
-                            stringParameterApiId.ParameterArn,
-                            stringParameterApiStage.ParameterArn,
-                        ],
-                    }),
-                ],
-            });
 
             // Creación de la CfnApiMapping para el API Gateway...
             CfnApiMapping apiMapping = new(this, $"{appName}APIApiMapping", new CfnApiMappingProps {
