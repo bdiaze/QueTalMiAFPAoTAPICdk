@@ -95,6 +95,7 @@ builder.Services.AddSingleton<HistorialNotificacionDAO>();
 builder.Services.AddSingleton<NotificacionDAO>();
 builder.Services.AddSingleton<TipoNotificacionDAO>();
 builder.Services.AddSingleton<TipoPeriodicidadDAO>();
+builder.Services.AddSingleton<ApiKeyDAO>();
 
 // builder.Services.AddSingleton<QueTalMiAFPAoTAPI.Repositories.DynamoDB.UfDAO>();
 // builder.Services.AddSingleton<QueTalMiAFPAoTAPI.Repositories.DynamoDB.ComisionDAO>();
@@ -120,5 +121,6 @@ app.MapTipoPeriodicidadEndpoints();
 app.MapTipoNotificacionEndpoints();
 app.MapNotificacionEndpoints();
 app.MapHistorialNotificacionEndpoints();
+app.MapApiKeyEndpoints();
 
 app.Run();

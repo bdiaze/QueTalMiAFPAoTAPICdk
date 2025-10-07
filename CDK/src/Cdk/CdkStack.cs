@@ -103,24 +103,6 @@ namespace Cdk
                 Tier = ParameterTier.STANDARD,
             });
 
-            // Se crea DynamoDB de la aplicación...
-            /*
-            Table singleTable = new(this, $"{appName}SingleTable", new TableProps {
-                TableName = $"{appName}",
-                PartitionKey = new Attribute {
-                    Name = "PK",
-                    Type = AttributeType.STRING
-                },
-                SortKey = new Attribute { 
-                    Name = "SK",
-                    Type = AttributeType.STRING,
-                },
-                DeletionProtection = true,
-                BillingMode = BillingMode.PAY_PER_REQUEST,
-                RemovalPolicy = RemovalPolicy.DESTROY,
-            });
-            */
-
             // Se obtiene ARN del API Key...
             IStringParameter strParHermesApiKeyId = StringParameter.FromStringParameterArn(this, $"{appName}StringParameterHermesApiKeyId", arnParHermesApiKeyId);
             IStringParameter strParKairosApiKeyId = StringParameter.FromStringParameterArn(this, $"{appName}StringParameterKairosApiKeyId", arnParKairosApiKeyId);
@@ -182,43 +164,6 @@ namespace Cdk
                                         $"arn:aws:apigateway:{this.Region}::/apikeys/{strParKairosApiKeyId.StringValue}",
                                     ],
                                 }),
-                                new PolicyStatement(new PolicyStatementProps{
-                                    Sid = $"{appName}AccessToOwnApiKeys",
-                                    Actions = [
-                                        "apigateway:GET",
-                                        "apigateway:POST",
-                                        "apigateway:DELETE"
-                                    ],
-                                    Resources = [
-                                        $"arn:aws:apigateway:{this.Region}::/usageplans/*",
-                                        $"arn:aws:apigateway:{this.Region}::/apikeys/*",
-                                        $"arn:aws:apigateway:{this.Region}::/usageplans/*/keys/*",
-                                    ],
-                                    Conditions = new Dictionary<string, object> {
-                                        { "StringEquals",  new Dictionary<string, object> {
-                                            { "aws:ResourceTag/AppName", $"{appName}" }
-                                        } }
-                                    }
-                                }),
-                                /*
-                                new PolicyStatement(new PolicyStatementProps{
-                                    Sid = $"{appName}AccessToDynamoDB",
-                                    Actions = [
-                                        "dynamodb:GetItem",
-                                        "dynamodb:BatchGetItem",
-                                        "dynamodb:Query",
-                                        "dynamodb:Scan",
-                                        "dynamodb:PutItem",
-                                        "dynamodb:UpdateItem",
-                                        "dynamodb:DeleteItem",
-                                        "dynamodb:BatchWriteItem",
-                                    ],
-                                    Resources = [
-                                        singleTable.TableArn,
-                                        $"{singleTable.TableArn}/index/*",
-                                    ],
-                                }),
-                                */
                             ]
                         })
                     }
@@ -246,9 +191,6 @@ namespace Cdk
                     { "ARN_PARAMETER_KAIROS_API_KEY_ID", arnParKairosApiKeyId },
                     { "ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN", arnParNotifLambdaArn },
                     { "ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN", arnParNotifEjecRoleArn },
-                    // { "NAME_DYNAMODB_SINGLE_TABLE", singleTable.TableName }
-                    { "ARN_PARAMETER_APIGATEWAY_API_ID", $"arn:aws:ssm:{this.Region}:{this.Account}:parameter/{appName}/ApiGateway/ApiId" },
-                    { "ARN_PARAMETER_APIGATEWAY_STAGE_NAME", $"arn:aws:ssm:{this.Region}:{this.Account}:parameter/{appName}/ApiGateway/StageName" },
                 },
                 Vpc = vpc,
                 VpcSubnets = new SubnetSelection {
@@ -281,38 +223,6 @@ namespace Cdk
                 DefaultMethodOptions = new MethodOptions {
                     ApiKeyRequired = true,
                 },
-            });
-
-            // Se crean parámetros que se usarán para crear los API Keys...
-            StringParameter stringParameterApiId = new(this, $"{appName}StringParameterApiId", new StringParameterProps {
-                ParameterName = $"/{appName}/ApiGateway/ApiId",
-                Description = $"API ID de la aplicacion {appName}",
-                StringValue = lambdaRestApi.RestApiId,
-                Tier = ParameterTier.STANDARD,
-            });
-            StringParameter stringParameterStageName = new(this, $"{appName}StringParameterStageName", new StringParameterProps {
-                ParameterName = $"/{appName}/ApiGateway/StageName",
-                Description = $"Stage Name de la aplicacion {appName}",
-                StringValue = lambdaRestApi.DeploymentStage.StageName,
-                Tier = ParameterTier.STANDARD,
-            });
-
-            _ = new ManagedPolicy(this, $"{appName}APIManagedPolicy", new ManagedPolicyProps{ 
-                ManagedPolicyName = $"{appName}APIManagedPolicy",
-                Description = $"Politica para acceder a los parametros de API Gateway de {appName}",
-                Roles = [roleLambda],
-                Statements = [
-                    new PolicyStatement(new PolicyStatementProps {
-                        Sid = $"{appName}AccessToParameterStore",
-                        Actions = [ 
-                            "ssm:GetParameter"
-                        ],
-                        Resources = [
-                            stringParameterApiId.ParameterArn,
-                            stringParameterStageName.ParameterArn,
-                        ],
-                    }),
-                ],
             });
 
             // Creación de la CfnApiMapping para el API Gateway...

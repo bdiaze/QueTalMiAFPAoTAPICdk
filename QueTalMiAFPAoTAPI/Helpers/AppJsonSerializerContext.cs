@@ -47,6 +47,9 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(ParametroNotificacion))]
     [JsonSerializable(typeof(EntCrearApiKey))]
     [JsonSerializable(typeof(SalCrearApiKey))]
+    [JsonSerializable(typeof(ApiKey))]
+    [JsonSerializable(typeof(List<ApiKey>))]
+    [JsonSerializable(typeof(EntValidarApiKey))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }
