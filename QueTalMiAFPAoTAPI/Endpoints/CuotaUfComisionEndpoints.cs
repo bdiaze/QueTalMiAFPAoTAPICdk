@@ -146,17 +146,22 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                     foreach (string afp in afps) {
                         foreach (string fondo in fondos) {
                             foreach (DateTime fecha in fechas) {
-                                DateTime key = cuotas[afp][fondo].Keys.Where(c => c <= fecha).Max();
-                                CuotaUfComision? cuota = cuotas[afp][fondo][key];
+                                if (cuotas.TryGetValue(afp, out Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>? dictFondos) && 
+                                    dictFondos.TryGetValue(fondo, out SortedDictionary<DateTime, CuotaUfComision>? dictFechas)) {
+                                    if (dictFechas.Keys.Any(c => c <= fecha)) {
+                                        DateTime key = dictFechas.Keys.Where(c => c <= fecha).Max();
+                                        CuotaUfComision? cuota = dictFechas[key];
 
-                                if (cuota != null) {
-                                    retorno.Add(new SalObtenerUltimaCuota { 
-                                        Afp = cuota.Afp,
-                                        Fecha = cuota.Fecha,
-                                        Fondo = cuota.Fondo,
-                                        Valor = cuota.Valor,
-                                        Comision = entrada.TipoComision == (byte)TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
-                                    });
+                                        if (cuota != null) {
+                                            retorno.Add(new SalObtenerUltimaCuota {
+                                                Afp = cuota.Afp,
+                                                Fecha = cuota.Fecha,
+                                                Fondo = cuota.Fondo,
+                                                Valor = cuota.Valor,
+                                                Comision = entrada.TipoComision == (byte)TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
+                                            });
+                                        }
+                                    }
                                 }
                             }
                         }
