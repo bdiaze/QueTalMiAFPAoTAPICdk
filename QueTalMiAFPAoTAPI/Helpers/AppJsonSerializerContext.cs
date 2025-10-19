@@ -50,6 +50,8 @@ namespace QueTalMiAFPAoTAPI.Helpers {
     [JsonSerializable(typeof(ApiKey))]
     [JsonSerializable(typeof(List<ApiKey>))]
     [JsonSerializable(typeof(EntValidarApiKey))]
+    [JsonSerializable(typeof(HistorialUsoApiKey))]
+    [JsonSerializable(typeof(EntIngresarHistorialUsoApiKey))]
     internal partial class AppJsonSerializerContext: JsonSerializerContext {
     
     }
