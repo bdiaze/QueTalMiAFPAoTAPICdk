@@ -39,9 +39,11 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
 
                     return Results.Ok(salida);
                 } catch (Exception ex) {
+                    string publicKey = entrada.ApiKey != null && entrada.ApiKey.Length >= 10 ? entrada.ApiKey[..10] : "";
+
                     LambdaLogger.Log(
                         $"[POST] - [HistorialUsoApiKey] - [Ingresar] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status500InternalServerError}] - " +
-                        $"Ocurrió un error al ingresar el historial de uso de API key - ID API Key: {entrada.IdApiKey} - Fecha Uso: {entrada.FechaUso:yyyy-MM-dd HH:mm:ss} " +
+                        $"Ocurrió un error al ingresar el historial de uso de API key - Public ID: {publicKey} - Fecha Uso: {entrada.FechaUso:yyyy-MM-dd HH:mm:ss} " +
                     $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
