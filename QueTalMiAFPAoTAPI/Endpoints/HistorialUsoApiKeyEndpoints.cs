@@ -14,11 +14,24 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapIngresarEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapPost("/Ingresar", async (EntIngresarHistorialUsoApiKey entrada, HistorialUsoApiKeyDAO historialUsoApiKeyDAO) => {
+            routes.MapPost("/Ingresar", async (EntIngresarHistorialUsoApiKey entrada, HistorialUsoApiKeyDAO historialUsoApiKeyDAO, ApiKeyDAO apiKeyDAO) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    HistorialUsoApiKey salida = await historialUsoApiKeyDAO.Ingresar(entrada.IdApiKey, entrada.FechaUso, entrada.Ruta, entrada.ParametrosEntrada, entrada.CodigoRetorno, entrada.CantRegistrosRetorno);
+                    string publicId = entrada.ApiKey[..10];
+                    string apiKey = entrada.ApiKey[10..];
+
+                    // Se valida que exista el API Key...
+                    ApiKey apiKeyExistente = await apiKeyDAO.ObtenerPorApiKeyPublicId(publicId) ?? throw new Exception($"No existe la API key con Public ID {publicId}.");
+
+                   HistorialUsoApiKey salida = await historialUsoApiKeyDAO.Ingresar(
+                       apiKeyExistente.Id!.Value, 
+                       entrada.FechaUso, 
+                       entrada.Ruta, 
+                       entrada.ParametrosEntrada, 
+                       entrada.CodigoRetorno, 
+                       entrada.CantRegistrosRetorno
+                    );
 
                     LambdaLogger.Log(
                         $"[POST] - [HistorialUsoApiKey] - [Ingresar] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +

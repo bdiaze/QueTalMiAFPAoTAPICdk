@@ -1,6 +1,6 @@
 ﻿namespace QueTalMiAFPAoTAPI.Models {
     public class EntIngresarHistorialUsoApiKey {
-        public required long IdApiKey { get; set; }
+        public required string ApiKey { get; set; }
         public required DateTimeOffset FechaUso { get; set; }
         public required string Ruta { get; set; }
         public required string ParametrosEntrada { get; set; }
