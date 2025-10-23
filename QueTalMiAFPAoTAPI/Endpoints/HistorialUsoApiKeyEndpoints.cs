@@ -33,6 +33,9 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                        entrada.CantRegistrosRetorno
                     );
 
+                    apiKeyExistente.FechaUltimoUso = entrada.FechaUso;
+                    await apiKeyDAO.Modificar(apiKeyExistente);
+
                     LambdaLogger.Log(
                         $"[POST] - [HistorialUsoApiKey] - [Ingresar] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
                         $"Se ingresó exitosamente el historial de uso de API key - ID: {salida.Id}");

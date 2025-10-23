@@ -154,9 +154,6 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         return Results.Unauthorized();
                     }
 
-                    apiKeyExistente.FechaUltimoUso = DateTimeOffset.UtcNow;
-                    await apiKeyDAO.Modificar(apiKeyExistente);
-
                     LambdaLogger.Log(
                         $"[POST] - [ApiKey] - [Validar] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
                         $"Validación exitosa del API key - Public ID: {publicId}.");
