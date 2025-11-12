@@ -158,6 +158,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                                                 Fecha = cuota.Fecha,
                                                 Fondo = cuota.Fondo,
                                                 Valor = cuota.Valor,
+                                                ValorUf = cuota.ValorUf,
                                                 Comision = entrada.TipoComision == (byte)TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
                                             });
                                         }
