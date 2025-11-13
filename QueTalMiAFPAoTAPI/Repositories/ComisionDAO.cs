@@ -5,7 +5,7 @@ using System.Data.Common;
 
 namespace QueTalMiAFPAoTAPI.Repositories {
     public class ComisionDAO(DatabaseConnectionHelper connectionHelper) {
-        public async Task<Comision?> ObtenerComision(byte tipoComision, string afp, DateTime fecha) {
+        public async Task<Comision?> ObtenerComision(byte tipoComision, string afp, DateOnly fecha) {
             Comision? comision = null;
 
             string queryString = "SELECT CO.\"ID\", CO.\"AFP\", CO.\"FECHA\", CO.\"VALOR\", CO.\"TIPO_COMISION\", CO.\"TIPO_VALOR\" " +
@@ -26,7 +26,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                 comision = new Comision { 
                     Id = reader.GetInt64(0),
                     Afp = reader.GetString(1),
-                    Fecha = reader.GetDateTime(2),
+                    Fecha = DateOnly.FromDateTime(reader.GetDateTime(2)),
                     Valor = reader.GetDecimal(3),
                     TipoComision = reader.GetByte(4),
                     TipoValor = reader.GetByte(5)

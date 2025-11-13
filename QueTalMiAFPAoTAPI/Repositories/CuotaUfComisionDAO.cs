@@ -2,14 +2,15 @@
 using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
+using System.Data;
 using System.Data.Common;
 using System.Globalization;
 
 namespace QueTalMiAFPAoTAPI.Repositories {
     public class CuotaUfComisionDAO(DatabaseConnectionHelper connectionHelper) {
 
-        public async Task<DateTime> ObtenerUltimaFechaAlguna() {
-            DateTime ultimaFecha = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time"));
+        public async Task<DateOnly> ObtenerUltimaFechaAlguna() {
+			DateOnly ultimaFecha = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time")));
 
             string queryString = "SELECT MAX(\"FECHA\") " +
                 "FROM \"QueTalMiAFP\".\"CUOTA\";";
@@ -19,15 +20,15 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             DbDataReader reader = await command.ExecuteReaderAsync();
             bool existe = await reader.ReadAsync();
             if (existe) {
-                ultimaFecha = reader.GetDateTime(0);
+                ultimaFecha = DateOnly.FromDateTime(reader.GetDateTime(0));
             }
             await reader.CloseAsync();
             
             return ultimaFecha;
         }
 
-        public async Task<DateTime> ObtenerUltimaFechaTodas() {
-            DateTime ultimaFecha = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time"));
+        public async Task<DateOnly> ObtenerUltimaFechaTodas() {
+			DateOnly ultimaFecha = DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time")));
 
             string queryString = "SELECT MIN(TMP.\"MAX_FECHA\") " +
                     "FROM ( " +
@@ -41,14 +42,14 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             DbDataReader reader = await command.ExecuteReaderAsync();
             bool existe = await reader.ReadAsync();
             if (existe) {
-                ultimaFecha = reader.GetDateTime(0);
+                ultimaFecha = DateOnly.FromDateTime(reader.GetDateTime(0));
             }
             await reader.CloseAsync();
 
             return ultimaFecha;
         }
 
-        public async Task<List<CuotaUf>> ObtenerCuotas(string[] afps, string[] fondos, DateTime dtFechaInicio, DateTime dtFechaFinal) {
+        public async Task<List<CuotaUf>> ObtenerCuotas(string[] afps, string[] fondos, DateOnly dtFechaInicio, DateOnly dtFechaFinal) {
             List<CuotaUf> cuotas = [];
 
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
@@ -88,7 +89,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             while (await reader.ReadAsync()) {
                 cuotas.Add(new CuotaUf { 
                     Afp = reader.GetString(0),
-                    Fecha = reader.GetDateTime(1).ToString("yyyy-MM-dd"),
+                    Fecha = DateOnly.FromDateTime(reader.GetDateTime(1)),
                     Fondo = reader.GetString(2),
                     Valor = Math.Round(reader.GetDecimal(3), 2),
                     ValorUf = await reader.IsDBNullAsync(4) ? null : Math.Round(reader.GetDecimal(4), 2)
@@ -99,8 +100,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             return cuotas;
         }
 
-        public async Task<Dictionary<string, Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>>> ObtenerUltimaCuota(string[] afps, string[] fondos, DateTime[] fechas) {
-            Dictionary<string, Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>> cuotas = [];
+        public async Task<Dictionary<string, Dictionary<string, SortedDictionary<DateOnly, CuotaUfComision>>>> ObtenerUltimaCuota(string[] afps, string[] fondos, DateOnly[] fechas) {
+            Dictionary<string, Dictionary<string, SortedDictionary<DateOnly, CuotaUfComision>>> cuotas = [];
 
             string queryString = "SELECT CUC.\"AFP\", CUC.\"FECHA\", CUC.\"FONDO\", CUC.\"VALOR\", CUC.\"VALOR_UF\", " +
                 "CUC.\"COMIS_DEPOS_COTIZ_OBLIG\", CUC.\"COMIS_ADMIN_CTA_AHO_VOL\" " +
@@ -126,7 +127,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             while (await reader.ReadAsync()) {
                 CuotaUfComision cuota = new() { 
                     Afp = reader.GetString(0),
-                    Fecha = reader.GetDateTime(1),
+                    Fecha = DateOnly.FromDateTime(reader.GetDateTime(1)),
                     Fondo = reader.GetString(2),
                     Valor = Math.Round(reader.GetDecimal(3), 2),
                     ValorUf = await reader.IsDBNullAsync(4) ? null : Math.Round(reader.GetDecimal(4), 2),
@@ -134,12 +135,12 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                     ComisAdminCtaAhoVol = await reader.IsDBNullAsync(6) ? null : Math.Round(reader.GetDecimal(6), 2)
                 };
 
-                if (!cuotas.TryGetValue(cuota.Afp, out Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>? dictFondos)) {
+                if (!cuotas.TryGetValue(cuota.Afp, out Dictionary<string, SortedDictionary<DateOnly, CuotaUfComision>>? dictFondos)) {
                     dictFondos = [];
                     cuotas.Add(cuota.Afp, dictFondos);
                 }
 
-                if (!dictFondos.TryGetValue(cuota.Fondo, out SortedDictionary<DateTime, CuotaUfComision>? dictCuotas)) {
+                if (!dictFondos.TryGetValue(cuota.Fondo, out SortedDictionary<DateOnly, CuotaUfComision>? dictCuotas)) {
                     dictCuotas = [];
                     dictFondos.Add(cuota.Fondo, dictCuotas);
                 }

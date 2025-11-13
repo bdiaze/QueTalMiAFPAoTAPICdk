@@ -15,7 +15,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapObtenerMensajesEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapGet("/ObtenerMensajes", async (DateTime fechaDesde, DateTime fechaHasta, MensajeUsuarioDAO mensajeUsuarioDAO) => {
+            routes.MapGet("/ObtenerMensajes", async (DateTimeOffset fechaDesde, DateTimeOffset fechaHasta, MensajeUsuarioDAO mensajeUsuarioDAO) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
@@ -43,7 +43,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    DateTime fechaActual = TimeZoneInfo.ConvertTime(DateTime.Now, TimeZoneConverter.TZConvert.GetTimeZoneInfo("Pacific SA Standard Time"));
+                    DateTimeOffset fechaActual = DateTimeOffset.Now;
                     MensajeUsuario mensajeIngresado = await mensajeUsuarioDAO.IngresarMensajeUsuario(mensaje.IdTipoMensaje, fechaActual, mensaje.Nombre, mensaje.Correo, mensaje.Mensaje);
                     mensajeIngresado.TipoMensaje = await tipoMensajeDAO.ObtenerTipoMensaje(mensajeIngresado.IdTipoMensaje);
 

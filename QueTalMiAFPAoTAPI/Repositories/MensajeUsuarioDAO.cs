@@ -6,7 +6,7 @@ using System.Data.Common;
 
 namespace QueTalMiAFPAoTAPI.Repositories {
     public class MensajeUsuarioDAO(DatabaseConnectionHelper connectionHelper) {
-        public async Task<List<MensajeUsuario>> ObtenerMensajesUsuarios(DateTime fechaDesde, DateTime fechaHasta) {
+        public async Task<List<MensajeUsuario>> ObtenerMensajesUsuarios(DateTimeOffset fechaDesde, DateTimeOffset fechaHasta) {
             List<MensajeUsuario> mensajes = [];
 
             string queryString = "SELECT MU.\"ID_MENSAJE\", MU.\"ID_TIPO_MENSAJE\", MU.\"FECHA_INGRESO\", " +
@@ -21,8 +21,8 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
             await using NpgsqlCommand command = new(queryString, connection);
 
-            command.Parameters.AddWithValue("@FechaDesde", fechaDesde);
-            command.Parameters.AddWithValue("@FechaHasta", fechaHasta);
+            command.Parameters.AddWithValue("@FechaDesde", fechaDesde.ToUniversalTime());
+            command.Parameters.AddWithValue("@FechaHasta", fechaHasta.ToUniversalTime());
 
             DbDataReader reader = await command.ExecuteReaderAsync();
             while (await reader.ReadAsync()) {
@@ -46,7 +46,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             return mensajes;
         }
 
-        public async Task<MensajeUsuario> IngresarMensajeUsuario(short idTipoMensaje, DateTime fechaIngreso, string nombre, string correo, string mensaje) {
+        public async Task<MensajeUsuario> IngresarMensajeUsuario(short idTipoMensaje, DateTimeOffset fechaIngreso, string nombre, string correo, string mensaje) {
             string queryString = "INSERT INTO \"QueTalMiAFP\".\"MENSAJE_USUARIO\"(" +
                 "\"ID_TIPO_MENSAJE\", " +
                 "\"FECHA_INGRESO\", " +
@@ -66,7 +66,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
             await using NpgsqlCommand command = new(queryString, connection);
 
             command.Parameters.AddWithValue("@IdTipoMensaje", idTipoMensaje);
-            command.Parameters.AddWithValue("@FechaIngreso", fechaIngreso);
+            command.Parameters.AddWithValue("@FechaIngreso", fechaIngreso.ToUniversalTime());
             command.Parameters.AddWithValue("@Nombre", nombre);
             command.Parameters.AddWithValue("@Correo", correo);
             command.Parameters.AddWithValue("@Mensaje", mensaje);

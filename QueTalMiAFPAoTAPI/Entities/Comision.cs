@@ -14,7 +14,7 @@
     public class Comision {
         public long? Id { get; set; }
         public required string Afp { get; set; }
-        public required DateTime Fecha { get; set; }
+        public required DateOnly Fecha { get; set; }
         public required decimal Valor { get; set; }
         public required byte TipoComision { get; set; }
         public required byte TipoValor { get; set; }

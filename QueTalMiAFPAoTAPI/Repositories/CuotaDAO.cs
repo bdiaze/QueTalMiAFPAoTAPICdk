@@ -6,7 +6,7 @@ using System.Data.Common;
 namespace QueTalMiAFPAoTAPI.Repositories {
     public class CuotaDAO(DatabaseConnectionHelper connectionHelper) {
 
-        public async Task<Cuota?> ObtenerCuota(string afp, DateTime fecha, string fondo) {
+        public async Task<Cuota?> ObtenerCuota(string afp, DateOnly fecha, string fondo) {
             Cuota? cuota = null;
 
             string queryString = "SELECT CU.\"ID\", CU.\"AFP\", CU.\"FECHA\", CU.\"FONDO\", CU.\"VALOR\" " +
@@ -27,7 +27,7 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                 cuota = new Cuota { 
                     Id = reader.GetInt64(0),
                     Afp = reader.GetString(1),
-                    Fecha = reader.GetDateTime(2),
+                    Fecha = DateOnly.FromDateTime(reader.GetDateTime(2)),
                     Fondo = reader.GetString(3),
                     Valor = reader.GetDecimal(4)
                 };

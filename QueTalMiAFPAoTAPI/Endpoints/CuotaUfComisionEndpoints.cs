@@ -26,7 +26,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    DateTime ultimaFecha = await cuotaUfComisionDAO.ObtenerUltimaFechaAlguna();
+                    DateOnly ultimaFecha = await cuotaUfComisionDAO.ObtenerUltimaFechaAlguna();
 
                     LambdaLogger.Log(
                         $"[GET] - [CuotaUfComision] - [UltimaFechaAlguna] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
@@ -50,7 +50,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    DateTime ultimaFecha = await cuotaUfComisionDAO.ObtenerUltimaFechaTodas();
+					DateOnly ultimaFecha = await cuotaUfComisionDAO.ObtenerUltimaFechaTodas();
 
                     LambdaLogger.Log(
                         $"[GET] - [CuotaUfComision] - [UltimaFechaTodas] - [{stopwatch.ElapsedMilliseconds} ms] - [{StatusCodes.Status200OK}] - " +
@@ -70,27 +70,14 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapObtenerCuotasEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapGet("/ObtenerCuotas", async (string listaAFPs, string listaFondos, string fechaInicial, string fechaFinal, CuotaUfComisionDAO cuotaUfComisionDAO, S3Helper s3Helper, VariableEntornoHelper variableEntorno) => {
+            routes.MapGet("/ObtenerCuotas", async (string listaAFPs, string listaFondos, DateOnly fechaInicial, DateOnly fechaFinal, CuotaUfComisionDAO cuotaUfComisionDAO, S3Helper s3Helper, VariableEntornoHelper variableEntorno) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
                     string[] afps = listaAFPs.ToUpper().Replace(" ", "").Split(",");
                     string[] fondos = listaFondos.ToUpper().Replace(" ", "").Split(",");
-                    string[] diaMesAnnoInicio = fechaInicial.Split("/");
-                    string[] diaMesAnnoFinal = fechaFinal.Split("/");
 
-                    DateTime dtFechaInicio = new(
-                        int.Parse(diaMesAnnoInicio[2]),
-                        int.Parse(diaMesAnnoInicio[1]),
-                        int.Parse(diaMesAnnoInicio[0])
-                    );
-                    DateTime dtFechaFinal = new(
-                        int.Parse(diaMesAnnoFinal[2]),
-                        int.Parse(diaMesAnnoFinal[1]),
-                        int.Parse(diaMesAnnoFinal[0])
-                    );
-
-                    List<CuotaUf> cuotas = await cuotaUfComisionDAO.ObtenerCuotas(afps, fondos, dtFechaInicio, dtFechaFinal);
+                    List<CuotaUf> cuotas = await cuotaUfComisionDAO.ObtenerCuotas(afps, fondos, fechaInicial, fechaFinal);
 
                     string jsonRetorno = JsonSerializer.Serialize(cuotas, AppJsonSerializerContext.Default.ListCuotaUf);
                     int cantBytes = Encoding.UTF8.GetByteCount(jsonRetorno);
@@ -125,32 +112,44 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
 
         private static IEndpointRouteBuilder MapObtenerUltimaCuotaEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapPost("/ObtenerUltimaCuota", async (EntObtenerUltimaCuota entrada, CuotaUfComisionDAO cuotaUfComisionDAO) => {
+            routes.MapPost("/ObtenerUltimaCuota", async (EntObtenerUltimaCuota entrada, CuotaUfComisionDAO cuotaUfComisionDAO, UfDAO ufDAO) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
                     string[] afps = entrada.ListaAFPs.ToUpper().Replace(" ", "").Split(",");
                     string[] fondos = entrada.ListaFondos.ToUpper().Replace(" ", "").Split(",");
-                    DateTime[] fechas = [.. entrada.ListaFechas.Replace(" ", "").Split(",").Select(f => {
-                        string[] diaMesAnno = f.Split("/");
-                        return new DateTime(
-                            int.Parse(diaMesAnno[2]),
-                            int.Parse(diaMesAnno[1]),
-                            int.Parse(diaMesAnno[0])
+                    DateOnly[] fechas = [.. entrada.ListaFechas.Replace(" ", "").Split(",").Select(f => {
+                        string[] annoMesDia = f.Split("-");
+                        return new DateOnly(
+                            int.Parse(annoMesDia[0]),
+                            int.Parse(annoMesDia[1]),
+                            int.Parse(annoMesDia[2])
                         );
                     })];
 
-                    Dictionary<string, Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, fechas);
+                    Dictionary<string, Dictionary<string, SortedDictionary<DateOnly, CuotaUfComision>>> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, fechas);
+
+                    SortedDictionary<DateOnly, Uf>? ufs = null;
+                    if (!entrada.UsarUfValorCuota) {
+                        ufs = await ufDAO.ObtenerVariasUf(fechas);
+                    }
 
                     List<SalObtenerUltimaCuota> retorno = [];
                     foreach (string afp in afps) {
                         foreach (string fondo in fondos) {
-                            foreach (DateTime fecha in fechas) {
-                                if (cuotas.TryGetValue(afp, out Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>? dictFondos) && 
-                                    dictFondos.TryGetValue(fondo, out SortedDictionary<DateTime, CuotaUfComision>? dictFechas)) {
+                            foreach (DateOnly fecha in fechas) {
+                                if (cuotas.TryGetValue(afp, out Dictionary<string, SortedDictionary<DateOnly, CuotaUfComision>>? dictFondos) && 
+                                    dictFondos.TryGetValue(fondo, out SortedDictionary<DateOnly, CuotaUfComision>? dictFechas)) {
                                     if (dictFechas.Keys.Any(c => c <= fecha)) {
-                                        DateTime key = dictFechas.Keys.Where(c => c <= fecha).Max();
+										DateOnly key = dictFechas.Keys.Where(c => c <= fecha).Max();
                                         CuotaUfComision? cuota = dictFechas[key];
+
+										// Si indican no usar la UF del valor cuota, se usa la UF de la fecha solicitada...
+										DateOnly fechaUf = cuota.Fecha;
+                                        if (!entrada.UsarUfValorCuota && ufs != null && ufs.TryGetValue(fecha, out Uf? uf)) {
+                                            cuota.ValorUf = uf.Valor;
+                                            fechaUf = fecha;
+                                        }
 
                                         if (cuota != null) {
                                             retorno.Add(new SalObtenerUltimaCuota {
@@ -158,6 +157,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                                                 Fecha = cuota.Fecha,
                                                 Fondo = cuota.Fondo,
                                                 Valor = cuota.Valor,
+                                                FechaUf = fechaUf,
                                                 ValorUf = cuota.ValorUf,
                                                 Comision = entrada.TipoComision == (byte)TipoComision.DeposCotizOblig ? cuota.ComisDeposCotizOblig : cuota.ComisAdminCtaAhoVol
                                             });
@@ -186,7 +186,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
         }
     
         private static IEndpointRouteBuilder MapObtenerRentabilidadRealEndpoint(this IEndpointRouteBuilder routes) {
-            routes.MapGet("/ObtenerRentabilidadReal", async (string listaAFPs, string listaFondos, DateTime fechaInicial, DateTime fechaFinal, CuotaUfComisionDAO cuotaUfComisionDAO) => {
+            routes.MapGet("/ObtenerRentabilidadReal", async (string listaAFPs, string listaFondos, DateOnly fechaInicial, DateOnly fechaFinal, CuotaUfComisionDAO cuotaUfComisionDAO) => {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
@@ -195,12 +195,12 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
 
                     List<RentabilidadReal> retorno = [];
 
-                    Dictionary<string, Dictionary<string, SortedDictionary<DateTime, CuotaUfComision>>> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, [ fechaFinal, fechaInicial ]);
+                    Dictionary<string, Dictionary<string, SortedDictionary<DateOnly, CuotaUfComision>>> cuotas = await cuotaUfComisionDAO.ObtenerUltimaCuota(afps, fondos, [ fechaFinal, fechaInicial ]);
 
                     foreach (string afp in afps) {
                         foreach (string fondo in fondos) {
-                            DateTime keyMin = cuotas[afp][fondo].Keys.Min();
-                            DateTime keyMax = cuotas[afp][fondo].Keys.Max();
+							DateOnly keyMin = cuotas[afp][fondo].Keys.Min();
+							DateOnly keyMax = cuotas[afp][fondo].Keys.Max();
 
 
                             CuotaUfComision? cuotaInicial = cuotas[afp][fondo][keyMin];
