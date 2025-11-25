@@ -63,6 +63,7 @@ builder.Services.AddSingleton<IAmazonAPIGateway>(sp => {
     };
     return new AmazonAPIGatewayClient(config);
 });
+/*
 builder.Services.AddSingleton<IAmazonDynamoDB>(sp => {
     AmazonDynamoDBConfig config = new() {
         ConnectTimeout = TimeSpan.FromSeconds(5),
@@ -70,6 +71,7 @@ builder.Services.AddSingleton<IAmazonDynamoDB>(sp => {
     };
     return new AmazonDynamoDBClient(config);
 });
+*/
 #endregion
 
 #region Singleton Helpers
