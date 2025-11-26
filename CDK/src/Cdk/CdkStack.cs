@@ -201,6 +201,7 @@ namespace Cdk
                 
             });
 
+            /*
             // Se configura provisioned concurrency para la lambda...
             _ = new Alias(this, $"{appName}APILambdaAlias", new AliasProps { 
                 AliasName = $"{appName}APILatest",
@@ -208,6 +209,7 @@ namespace Cdk
                 Version = function.CurrentVersion,
                 ProvisionedConcurrentExecutions = 1,
             });
+            */
 
 			// Creación de access logs...
 			LogGroup logGroupAccessLogs = new(this, $"{appName}APILambdaFunctionLogGroup", new LogGroupProps {
