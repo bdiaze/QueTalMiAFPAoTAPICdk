@@ -198,10 +198,19 @@ namespace Cdk
                 },
                 SecurityGroups = [securityGroup],
                 Role = roleLambda,
+                
             });
 
-            // Creación de access logs...
-            LogGroup logGroupAccessLogs = new(this, $"{appName}APILambdaFunctionLogGroup", new LogGroupProps {
+            // Se configura provisioned concurrency para la lambda...
+            _ = new Alias(this, $"{appName}APILambdaAlias", new AliasProps { 
+                AliasName = $"{appName}APILatest",
+                Description = $"Alias de API {appName} - Version Latest",
+                Version = function.CurrentVersion,
+                ProvisionedConcurrentExecutions = 1,
+            });
+
+			// Creación de access logs...
+			LogGroup logGroupAccessLogs = new(this, $"{appName}APILambdaFunctionLogGroup", new LogGroupProps {
                 LogGroupName = $"/aws/lambda/{appName}API/access_logs",
                 Retention = RetentionDays.ONE_MONTH,
                 RemovalPolicy = RemovalPolicy.DESTROY
