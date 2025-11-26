@@ -102,21 +102,38 @@ namespace QueTalMiAFPAoTAPI.Repositories {
 
         public async Task<Dictionary<string, Dictionary<string, SortedDictionary<DateOnly, CuotaUfComision>>>> ObtenerUltimaCuota(string[] afps, string[] fondos, DateOnly[] fechas) {
             Dictionary<string, Dictionary<string, SortedDictionary<DateOnly, CuotaUfComision>>> cuotas = [];
+                                         
+			string queryString = "WITH PARAMS AS (" +
+				"SELECT STT_AFP AS AFP, STT_FONDO AS FONDO, TO_DATE(STT_FECHA, 'YYYY-MM-DD') AS FECHA_LIMITE " +
+				"FROM STRING_TO_TABLE(@Afps, ',') AS STT_AFP " +
+				"CROSS JOIN STRING_TO_TABLE(@Fondos, ',') AS STT_FONDO " +
+				"CROSS JOIN STRING_TO_TABLE(@Fechas, ',') AS STT_FECHA), " +
+				"CUOTAS AS (" +
+				"SELECT TMP.\"AFP\", TMP.\"FONDO\", TMP.\"FECHA\", TMP.\"VALOR\" " +
+				"FROM PARAMS P " +
+				"CROSS JOIN LATERAL (" +
+				"SELECT CU.\"AFP\", CU.\"FONDO\", CU.\"FECHA\", CU.\"VALOR\" " +
+				"FROM \"QueTalMiAFP\".\"CUOTA\" CU " +
+				"WHERE CU.\"AFP\" = P.AFP " +
+				"AND CU.\"FONDO\" = P.FONDO " +
+				"AND CU.\"FECHA\" <= P.FECHA_LIMITE " +
+				"ORDER BY CU.\"FECHA\" DESC " +
+				"LIMIT 1) TMP) " +
+				"SELECT CU.\"AFP\", CU.\"FECHA\", CU.\"FONDO\", CU.\"VALOR\", UF.\"VALOR\" AS \"VALOR_UF\", " +
+				"CO1.\"VALOR\" AS \"COMIS_DEPOS_COTIZ_OBLIG\", CO2.\"VALOR\" AS \"COMIS_ADMIN_CTA_AHO_VOL\" " +
+				"FROM CUOTAS CU " +
+				"LEFT JOIN \"QueTalMiAFP\".\"UF\" UF " +
+				"ON UF.\"FECHA\" = CU.\"FECHA\" " +
+				"LEFT JOIN \"QueTalMiAFP\".\"COMISION\" CO1 " +
+				"ON CO1.\"AFP\" = CU.\"AFP\" AND " +
+				"CO1.\"FECHA\" = DATE_TRUNC('MONTH', CU.\"FECHA\") AND " +
+				"CO1.\"TIPO_COMISION\" = 1 " +
+				"LEFT JOIN \"QueTalMiAFP\".\"COMISION\" CO2 " +
+				"ON CO2.\"AFP\" = CU.\"AFP\" AND " +
+				"CO2.\"FECHA\" = DATE_TRUNC('MONTH', CU.\"FECHA\") AND " +
+				"CO2.\"TIPO_COMISION\" = 2;";
 
-            string queryString = "SELECT CUC.\"AFP\", CUC.\"FECHA\", CUC.\"FONDO\", CUC.\"VALOR\", CUC.\"VALOR_UF\", " +
-                "CUC.\"COMIS_DEPOS_COTIZ_OBLIG\", CUC.\"COMIS_ADMIN_CTA_AHO_VOL\" " +
-                "FROM \"QueTalMiAFP\".\"CUOTA_UF_COMISION\" CUC " +
-                "WHERE (CUC.\"AFP\", CUC.\"FONDO\", CUC.\"FECHA\") IN (SELECT \"STT_AFP\" AS \"AFP\", \"STT_FONDO\" AS \"FONDO\", " +
-                "(SELECT MAX(CU.\"FECHA\") " +
-                "FROM \"QueTalMiAFP\".\"CUOTA\" CU " +
-                "WHERE CU.\"AFP\" = \"STT_AFP\" " +
-                "AND CU.\"FONDO\" = \"STT_FONDO\" " +
-                "AND CU.\"FECHA\" <= TO_DATE(\"STT_FECHA\", 'YYYY-MM-DD')) AS \"FECHA\" " +
-                "FROM STRING_TO_TABLE(@Afps, ',') AS \"STT_AFP\" " +
-                "CROSS JOIN STRING_TO_TABLE(@Fondos, ',') AS \"STT_FONDO\" " +
-                "CROSS JOIN STRING_TO_TABLE(@Fechas, ',') AS \"STT_FECHA\");";
-
-            await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
+			await using NpgsqlConnection connection = await connectionHelper.ObtenerConexion();
             await using NpgsqlCommand command = new(queryString, connection);
 
             command.Parameters.AddWithValue("@Afps", string.Join(",", afps));
