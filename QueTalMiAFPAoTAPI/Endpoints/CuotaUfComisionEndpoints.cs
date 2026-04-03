@@ -116,9 +116,9 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                 Stopwatch stopwatch = Stopwatch.StartNew();
 
                 try {
-                    string[] afps = entrada.ListaAFPs.ToUpper().Replace(" ", "").Split(",");
-                    string[] fondos = entrada.ListaFondos.ToUpper().Replace(" ", "").Split(",");
-                    DateOnly[] fechas = [.. entrada.ListaFechas.Replace(" ", "").Split(",").Select(f => {
+                    string[] afps = [.. entrada.ListaAFPs.ToUpper().Replace(" ", "").Split(",", StringSplitOptions.RemoveEmptyEntries).Distinct()];
+                    string[] fondos = [.. entrada.ListaFondos.ToUpper().Replace(" ", "").Split(",", StringSplitOptions.RemoveEmptyEntries).Distinct()];
+                    DateOnly[] fechas = [.. entrada.ListaFechas.Replace(" ", "").Split(",", StringSplitOptions.RemoveEmptyEntries).Distinct().Select(f => {
                         string[] annoMesDia = f.Split("-");
                         return new DateOnly(
                             int.Parse(annoMesDia[0]),

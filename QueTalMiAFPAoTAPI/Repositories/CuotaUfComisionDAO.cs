@@ -161,8 +161,9 @@ namespace QueTalMiAFPAoTAPI.Repositories {
                     dictCuotas = [];
                     dictFondos.Add(cuota.Fondo, dictCuotas);
                 }
-
-                dictCuotas.Add(cuota.Fecha, cuota);
+                if (!dictCuotas.ContainsKey(cuota.Fecha)) {
+					dictCuotas.Add(cuota.Fecha, cuota);
+				}
             }
             await reader.CloseAsync();
             
