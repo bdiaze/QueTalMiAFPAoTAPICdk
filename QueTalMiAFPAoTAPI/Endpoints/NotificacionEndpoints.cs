@@ -1,6 +1,5 @@
 ﻿using Amazon.Lambda.Core;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.OpenApi.Models;
 using QueTalMiAFPAoTAPI.Entities;
 using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
@@ -39,7 +38,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            }).WithOpenApi();
+            });
 
             return routes;
         }
@@ -63,7 +62,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            }).WithOpenApi();
+            });
 
             return routes;
         }
@@ -122,7 +121,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            }).WithOpenApi();
+            });
 
             return routes;
         }
@@ -201,7 +200,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         $"{ex}");
                     return Results.Problem("Ocurrió un error al procesar su solicitud.");
                 }
-            }).WithOpenApi();
+            });
 
             return routes;
         }

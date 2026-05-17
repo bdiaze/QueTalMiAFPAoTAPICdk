@@ -11,9 +11,14 @@ using Amazon.CDK.AWS.SSM;
 using Constructs;
 using System;
 using System.Collections.Generic;
+using ApiKey = Amazon.CDK.AWS.APIGateway.ApiKey;
+using ApiKeyProps = Amazon.CDK.AWS.APIGateway.ApiKeyProps;
 using Attribute = Amazon.CDK.AWS.DynamoDB.Attribute;
 using LogGroupLogDestination = Amazon.CDK.AWS.APIGateway.LogGroupLogDestination;
 using StageOptions = Amazon.CDK.AWS.APIGateway.StageOptions;
+using UsagePlan = Amazon.CDK.AWS.APIGateway.UsagePlan;
+using UsagePlanPerApiStage = Amazon.CDK.AWS.APIGateway.UsagePlanPerApiStage;
+using UsagePlanProps = Amazon.CDK.AWS.APIGateway.UsagePlanProps;
 
 namespace Cdk
 {
@@ -172,7 +177,7 @@ namespace Cdk
 
             // Creación de la función lambda...
             Function function = new(this, $"{appName}APILambdaFunction", new FunctionProps {
-                Runtime = Runtime.DOTNET_8,
+                Runtime = Runtime.DOTNET_10,
                 Handler = handler,
                 Code = Code.FromAsset("../publish/publish.zip"),
                 FunctionName = $"{appName}API",

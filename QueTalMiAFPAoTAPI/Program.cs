@@ -6,7 +6,7 @@ using Amazon.S3;
 using Amazon.SecretsManager;
 using Amazon.SimpleSystemsManagement;
 using Microsoft.AspNetCore.Routing.Constraints;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using QueTalMiAFPAoTAPI.Endpoints;
 using QueTalMiAFPAoTAPI.Helpers;
 using QueTalMiAFPAoTAPI.Models;
