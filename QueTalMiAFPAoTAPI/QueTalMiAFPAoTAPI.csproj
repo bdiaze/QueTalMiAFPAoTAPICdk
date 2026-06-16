@@ -9,16 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.AspNetCoreServer.Hosting" Version="2.0.0" />
-    <PackageReference Include="AWSSDK.APIGateway" Version="4.0.6.14" />
-    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.18.4" />
-    <PackageReference Include="AWSSDK.S3" Version="4.0.23.3" />
-    <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.4.23" />
-    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.7.17" />
+    <PackageReference Include="Amazon.Lambda.AspNetCoreServer.Hosting" Version="2.1.0" />
+    <PackageReference Include="AWSSDK.APIGateway" Version="4.0.7.8" />
+    <PackageReference Include="AWSSDK.DynamoDBv2" Version="4.0.21.4" />
+    <PackageReference Include="AWSSDK.S3" Version="4.0.24.5" />
+    <PackageReference Include="AWSSDK.SecretsManager" Version="4.0.5.5" />
+    <PackageReference Include="AWSSDK.SimpleSystemsManagement" Version="4.0.8.5" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
-    <PackageReference Include="Npgsql" Version="10.0.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.1" />
     <PackageReference Include="TimeZoneConverter" Version="7.2.0" />
   </ItemGroup>
 

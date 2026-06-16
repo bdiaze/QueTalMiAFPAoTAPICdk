@@ -162,26 +162,22 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         salida.FechaHabilitacion = DateTimeOffset.Now;
                         salida.FechaDeshabilitacion = null;
 
-                        // Además, se programa proceso de notificación si no existen otras notificaciones habilitadas...
-                        int cantOtrasNotif = (await notificacionDAO.ObtenerPorTipoNotificacion(salida.IdTipoNotificacion, 1)).Where(n => n.Id != salida.Id).Count();
-                        if (cantOtrasNotif == 0) {
-                            TipoNotificacion? tipoNotificacion = await tipoNotificacionDAO.ObtenerUna(salida.IdTipoNotificacion) ?? throw new Exception($"No existe el tipo de notificación ID: {salida.IdTipoNotificacion}");
-                            TipoPeriodicidad? tipoPeriodicidad = await tipoPeriodicidadDAO.ObtenerUna(tipoNotificacion.IdTipoPeriodicidad) ?? throw new Exception($"No existe el tipo de periodicidad ID: {tipoNotificacion.IdTipoPeriodicidad}");
+                        TipoNotificacion? tipoNotificacion = await tipoNotificacionDAO.ObtenerUna(salida.IdTipoNotificacion) ?? throw new Exception($"No existe el tipo de notificación ID: {salida.IdTipoNotificacion}");
+                        TipoPeriodicidad? tipoPeriodicidad = await tipoPeriodicidadDAO.ObtenerUna(tipoNotificacion.IdTipoPeriodicidad) ?? throw new Exception($"No existe el tipo de periodicidad ID: {tipoNotificacion.IdTipoPeriodicidad}");
 
-                            SalKairosIngresarProceso kairosProceso = await kairos.IngresarProceso(new EntKairosIngresarProceso() {
-                                Nombre = $"Notificación {salida.IdTipoNotificacion} - {variableEntorno.Obtener("APP_NAME")}",
-                                Cron = tipoPeriodicidad.Cron,
-                                ArnProceso = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN")),
-                                ArnRol = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN")),
-                                Parametros = JsonSerializer.Serialize(new ParametroNotificacion { IdTipoNotificacion = salida.IdTipoNotificacion }, AppJsonSerializerContext.Default.ParametroNotificacion),
-                                Habilitado = true,
-                            });
+                        SalKairosIngresarProceso kairosProceso = await kairos.IngresarProceso(new EntKairosIngresarProceso() {
+                            Nombre = $"Notificación {salida.IdTipoNotificacion} - {variableEntorno.Obtener("APP_NAME")}",
+                            Cron = tipoPeriodicidad.Cron,
+                            ArnProceso = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN")),
+                            ArnRol = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN")),
+                            Parametros = JsonSerializer.Serialize(new ParametroNotificacion { IdTipoNotificacion = salida.IdTipoNotificacion }, AppJsonSerializerContext.Default.ParametroNotificacion),
+                            Habilitado = true,
+                        });
 
-                            // Si no tenemos registrado el ID Proceso se actualiza... 
-                            if (tipoNotificacion.IdProceso != kairosProceso.IdProceso) {
-                                tipoNotificacion.IdProceso = kairosProceso.IdProceso;
-                                tipoNotificacion = await tipoNotificacionDAO.Modificar(tipoNotificacion);
-                            }
+                        // Si no tenemos registrado el ID Proceso se actualiza... 
+                        if (tipoNotificacion.IdProceso != kairosProceso.IdProceso) {
+                            tipoNotificacion.IdProceso = kairosProceso.IdProceso;
+                            tipoNotificacion = await tipoNotificacionDAO.Modificar(tipoNotificacion);
                         }
 
                     }
