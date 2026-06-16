@@ -82,7 +82,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         
                         // Nos aseguramos que exista el proceso de notificación para el cron deseado...
                         SalKairosIngresarProceso kairosProceso = await kairos.IngresarProceso(new EntKairosIngresarProceso() { 
-                            Nombre = $"Notificación {entrada.IdTipoNotificacion} - {variableEntorno.Obtener("APP_NAME")}",
+                            Nombre = $"Notificacion {entrada.IdTipoNotificacion} - {variableEntorno.Obtener("APP_NAME")}",
                             Cron = tipoPeriodicidad.Cron,
                             ArnProceso = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN")),
                             ArnRol = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN")),
@@ -166,7 +166,7 @@ namespace QueTalMiAFPAoTAPI.Endpoints {
                         TipoPeriodicidad? tipoPeriodicidad = await tipoPeriodicidadDAO.ObtenerUna(tipoNotificacion.IdTipoPeriodicidad) ?? throw new Exception($"No existe el tipo de periodicidad ID: {tipoNotificacion.IdTipoPeriodicidad}");
 
                         SalKairosIngresarProceso kairosProceso = await kairos.IngresarProceso(new EntKairosIngresarProceso() {
-                            Nombre = $"Notificación {salida.IdTipoNotificacion} - {variableEntorno.Obtener("APP_NAME")}",
+                            Nombre = $"Notificacion {salida.IdTipoNotificacion} - {variableEntorno.Obtener("APP_NAME")}",
                             Cron = tipoPeriodicidad.Cron,
                             ArnProceso = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_LAMBDA_ARN")),
                             ArnRol = await parameterStore.ObtenerParametro(variableEntorno.Obtener("ARN_PARAMETER_NOTIFICACIONES_EJECUCION_ROLE_ARN")),
